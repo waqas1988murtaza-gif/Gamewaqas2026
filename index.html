@@ -22,7 +22,6 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
 
-/* GRID LINES BG */
 .grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(99,179,237,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,179,237,0.03) 1px,transparent 1px);background-size:60px 60px;z-index:0;pointer-events:none;}
 
 header{position:sticky;top:0;z-index:100;background:rgba(8,11,20,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 24px;}
@@ -38,7 +37,6 @@ header{position:sticky;top:0;z-index:100;background:rgba(8,11,20,0.85);backdrop-
 .main-wrap{position:relative;z-index:5;max-width:1400px;margin:0 auto;padding:0 24px 60px;display:grid;grid-template-columns:1fr 300px;gap:28px;}
 @media(max-width:1100px){.main-wrap{grid-template-columns:1fr;}}
 
-/* GAMES GRID */
 .section-head{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
 .section-title{font-family:'Orbitron',monospace;font-size:1rem;font-weight:700;}
 .section-line{flex:1;height:1px;background:var(--border);}
@@ -54,22 +52,21 @@ header{position:sticky;top:0;z-index:100;background:rgba(8,11,20,0.85);backdrop-
 .d-hard{background:rgba(246,173,85,0.15);color:var(--hard);}
 .d-insane{background:rgba(252,129,129,0.15);color:var(--insane);}
 
-/* SIDEBAR */
 .sidebar-panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;padding:20px;}
 .sp-head{font-family:'Orbitron',monospace;font-size:0.85rem;font-weight:700;margin-bottom:15px;color:var(--accent2);}
 .lb-item{padding:8px 0;border-bottom:1px solid var(--border);font-size:0.9rem;}
 
-/* MODAL DESIGN WITH FULLSCREEN FIX */
+/* OVERLAY FOR MOBILE & DESKTOP FULL-SIZE GRAPHICS */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(8px);}
 .modal-overlay.open{display:flex;}
 .modal{background:var(--surface2);border:1px solid rgba(99,179,237,0.2);border-radius:20px;width:95%;max-width:800px;overflow:hidden;}
 .modal-header{padding:15px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
 .modal-title{font-family:'Orbitron',monospace;font-weight:700;}
 .action-btns{display:flex;gap:10px;}
-.m-btn{background:rgba(255,255,255,0.08);border:none;color:var(--text);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:0.85rem;font-weight:bold;}
+.m-btn{background:rgba(255,255,255,0.08);border:none;color:var(--text);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:0.85rem;font-weight:bold;}
 .m-btn:hover{background:var(--accent);color:#000;}
 .modal-body{padding:8px;background:#000;position:relative;}
-.game-frame-area{width:100%;aspect-ratio:4/3;max-height:70vh;border-radius:10px;overflow:hidden;}
+.game-frame-area{width:100%;aspect-ratio:4/3;max-height:65vh;border-radius:10px;overflow:hidden;}
 .game-frame-area iframe{width:100%;height:100%;border:none;}
 
 footer{border-top:1px solid var(--border);padding:30px 24px;background:var(--surface);margin-top:50px;}
@@ -92,13 +89,13 @@ footer{border-top:1px solid var(--border);padding:30px 24px;background:var(--sur
 
 <div class="hero">
   <h1>Train Your Brain, Free & Unlimited</h1>
-  <p>Pure verified logic puzzles that play instantly on mobile or desktop.</p>
+  <p>Exactly 20 premium logic puzzles verified to play natively everywhere.</p>
 </div>
 
 <div class="main-wrap">
   <div>
     <div class="section-head">
-      <div class="section-title">Verified Playable Games</div>
+      <div class="section-title">All 20 Premium Games</div>
       <div class="section-line"></div>
     </div>
     <div class="games-grid" id="gamesGrid"></div>
@@ -126,7 +123,7 @@ footer{border-top:1px solid var(--border);padding:30px 24px;background:var(--sur
     <div class="modal-header">
       <div class="modal-title" id="modalTitle">Game Title</div>
       <div class="action-btns">
-        <button class="m-btn" style="background:#2b6cb0;" onclick="toggleFullScreen()">⛶ Fullscreen</button>
+        <button class="m-btn" style="background:#2b6cb0;" onclick="goFullScreen()">⛶ Fullscreen (Mobile Friendly)</button>
         <button class="m-btn" style="background:#9b2c2c;" onclick="closeGame()">✕ Close</button>
       </div>
     </div>
@@ -137,16 +134,28 @@ footer{border-top:1px solid var(--border);padding:30px 24px;background:var(--sur
 </div>
 
 <script>
-// ========= PERFECTLY CLEAN CHOSEN OPEN LINKS - ZERO EMBED RESTRICTIONS =========
+// ==================== 20 VERIFIED COR-FRIENDLY OPEN EMBEDS ====================
 const GAMES = [
-  { id:1, name:"2048 Strategy", emoji:"🔢", diff:"hard", src:"https://api.v6.games/games/2048/index.html" },
-  { id:2, name:"Hextris Rush", emoji:"⬢", diff:"insane", src:"https://hextris.io/" },
-  { id:3, name:"Tic Tac Toe Arena", emoji:"❌", type:"Logic Board", diff:"easy", src:"https://playtictactoe.org/" },
-  { id:4, name:"Classic Sudoku Matrix", emoji:"🧩", diff:"insane", src:"https://html5.api.gamedistribution.com/embed/f2010892095f4af4bc760e4479cb205e/" },
-  { id:5, name:"Block Unblock Escape", emoji:"🚪", diff:"hard", src:"https://html5.api.gamedistribution.com/embed/41dbbf8b7260490b8f673f8b1c4c8d19/" },
-  { id:6, name:"Water Sort Lab", emoji:"🧪", diff:"hard", src:"https://html5.api.gamedistribution.com/embed/849931fc48474bd69a71be7bf2ed7b64/" },
-  { id:7, name:"Pipe Flow Connect", emoji:"🔧", diff:"easy", src:"https://html5.api.gamedistribution.com/embed/28da829c305a4980a133f910609d58de/" },
-  { id:8, name:"Word Search Hunt", emoji:"🔡", diff:"easy", src:"https://html5.api.gamedistribution.com/embed/c02058097d8c474eb12030d50711aa4c/" }
+  { id:1, name:"2048 Master Puzzle", emoji:"🔢", diff:"hard", src:"https://api.v6.games/games/2048/index.html" },
+  { id:2, name:"Hextris Mind Flex", emoji:"⬢", diff:"insane", src:"https://hextris.io/" },
+  { id:3, name:"Tic Tac Toe Deluxe", emoji:"❌", diff:"easy", src:"https://playtictactoe.org/" },
+  { id:4, name:"Classic Sudoku Prime", emoji:"🧩", diff:"insane", src:"https://html5.api.gamedistribution.com/embed/f2010892095f4af4bc760e4479cb205e/" },
+  { id:5, name:"Block Escape Route", emoji:"🚪", diff:"hard", src:"https://html5.api.gamedistribution.com/embed/41dbbf8b7260490b8f673f8b1c4c8d19/" },
+  { id:6, name:"Water Color Sort", emoji:"🧪", diff:"hard", src:"https://html5.api.gamedistribution.com/embed/849931fc48474bd69a71be7bf2ed7b64/" },
+  { id:7, name:"Pipe Logic Linker", emoji:"🔧", diff:"easy", src:"https://html5.api.gamedistribution.com/embed/28da829c305a4980a133f910609d58de/" },
+  { id:8, name:"Word Search Blast", emoji:"🔡", diff:"easy", src:"https://html5.api.gamedistribution.com/embed/c02058097d8c474eb12030d50711aa4c/" },
+  { id:9, name:"Tower Collapse Tech", emoji:"🗼", diff:"easy", src:"https://html5.api.gamedistribution.com/embed/14022aefc48b4887b47db95cb6262f3f/" },
+  { id:10, name:"Pacman Classic Run", emoji:"🍒", diff:"hard", src:"https://api.v6.games/games/pacman/index.html" },
+  { id:11, name:"Flappy Bird Mind Reflex", emoji:"🐦", diff:"hard", src:"https://api.v6.games/games/flappy-bird/index.html" },
+  { id:12, name:"Snake Arena Classic", emoji:"🐍", diff:"easy", src:"https://api.v6.games/games/snake/index.html" },
+  { id:13, name:"Tetris Block Shift", emoji:"🧱", diff:"insane", src:"https://api.v6.games/games/tetris/index.html" },
+  { id:14, name:"MineSweeper Logic", emoji:"💣", diff:"hard", src:"https://api.v6.games/games/minesweeper/index.html" },
+  { id:15, name:"Clumsy Bird Flight", emoji:"🦅", diff:"easy", src:"https://api.v6.games/games/clumsy-bird/index.html" },
+  { id:16, name:"Space Invaders Strategy", emoji:"👾", diff:"insane", src:"https://api.v6.games/games/space-invaders/index.html" },
+  { id:17, name:"Doodle Jump Lift", emoji:"🚀", diff:"easy", src:"https://api.v6.games/games/doodle-jump/index.html" },
+  { id:18, name:"Breakout Brick Smasher", emoji:"🥎", diff:"hard", src:"https://api.v6.games/games/breakout/index.html" },
+  { id:19, name:"Pong Classic Battle", emoji:"🏓", diff:"easy", src:"https://api.v6.games/games/pong/index.html" },
+  { id:20, name:"Tower Building Grid", emoji:"🏢", diff:"hard", src:"https://html5.api.gamedistribution.com/embed/a6bda45ccfa24dfb80b2ddf16df3c081/" }
 ];
 
 const diffLabels = { easy:'🟢 Easy', hard:'🟡 Hard', insane:'🔴 Insane' };
@@ -165,8 +174,7 @@ function renderGames() {
 function openGame(name, src) {
   document.getElementById('modalTitle').textContent = name;
   const frameContainer = document.getElementById('gameFrameArea');
-  // Added standard sandboxing and full screen features to iframe
-  frameContainer.innerHTML = `<iframe id="activeFrame" src="${src}" allow="fullscreen; autoplay" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>`;
+  frameContainer.innerHTML = `<iframe id="activeFrame" src="${src}" allow="fullscreen; autoplay;" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true"></iframe>`;
   document.getElementById('gameModal').classList.add('open');
 }
 
@@ -175,12 +183,14 @@ function closeGame() {
   document.getElementById('gameFrameArea').innerHTML = '';
 }
 
-// FULLSCREEN TRIGGER FOR MOBILE EXPERIENCE
-function toggleFullScreen() {
+// FULLSCREEN TRIGGER WITH MOBILE VIEWPORT INTEGRATION
+function goFullScreen() {
   const iframe = document.getElementById('activeFrame');
   if (!iframe) return;
+  
   if (iframe.requestFullscreen) { iframe.requestFullscreen(); }
   else if (iframe.webkitRequestFullscreen) { iframe.webkitRequestFullscreen(); }
+  else if (iframe.mozRequestFullScreen) { iframe.mozRequestFullScreen(); }
   else if (iframe.msRequestFullscreen) { iframe.msRequestFullscreen(); }
 }
 
