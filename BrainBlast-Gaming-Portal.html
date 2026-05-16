@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrainBlast — Logic, Puzzles & Brain Training Games</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080b14;
+  --surface: #0e1320;
+  --surface2: #141b2d;
+  --border: rgba(99,179,237,0.12);
+  --accent: #63b3ed;
+  --accent2: #f6ad55;
+  --accent3: #68d391;
+  --red: #fc8181;
+  --text: #e2e8f0;
+  --muted: #718096;
+  --easy: #68d391;
+  --hard: #f6ad55;
+  --insane: #fc8181;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+/* NOISE OVERLAY */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:0.4;}
+
+/* GRID LINES BG */
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(99,179,237,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(99,179,237,0.03) 1px,transparent 1px);background-size:60px 60px;z-index:0;pointer-events:none;}
+
+/* GLOW ORBS */
+.orb{position:fixed;border-radius:50%;filter:blur(100px);opacity:0.12;z-index:0;pointer-events:none;}
+.orb1{width:600px;height:600px;background:#3b82f6;top:-200px;left:-100px;animation:drift 18s ease-in-out infinite;}
+.orb2{width:500px;height:500px;background:#f59e0b;bottom:-100px;right:-100px;animation:drift 14s ease-in-out infinite reverse;}
+.orb3{width:400px;height:400px;background:#10b981;top:50%;left:50%;animation:drift 22s ease-in-out infinite 5s;}
+@keyframes drift{0%,100%{transform:translate(0,0);}33%{transform:translate(30px,-20px);}66%{transform:translate(-20px,30px);}}
+
+/* ===== ADSENSE TOP BANNER ===== */
+.ad-top{position:relative;z-index:10;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:center;padding:8px;min-height:90px;}
+.ad-placeholder{background:repeating-linear-gradient(45deg,rgba(255,255,255,0.02),rgba(255,255,255,0.02) 10px,rgba(255,255,255,0.04) 10px,rgba(255,255,255,0.04) 20px);border:1px dashed rgba(255,255,255,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:0.72rem;letter-spacing:1px;text-transform:uppercase;}
+.ad-top .ad-placeholder{width:728px;max-width:100%;height:90px;}
+/* Replace above div with your actual AdSense code */
+
+/* ===== HEADER ===== */
+header{position:sticky;top:0;z-index:100;background:rgba(8,11,20,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 24px;}
+.header-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;}
+.logo{display:flex;align-items:center;gap:12px;text-decoration:none;}
+.logo-mark{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),#3b82f6);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-weight:900;font-size:1.1rem;color:#fff;box-shadow:0 0 20px rgba(99,179,237,0.4);}
+.logo-name{font-family:'Orbitron',monospace;font-weight:700;font-size:1.1rem;letter-spacing:1px;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.logo-sub{font-size:0.65rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:-2px;}
+
+nav{display:flex;gap:4px;align-items:center;}
+nav a{color:var(--muted);text-decoration:none;font-size:0.82rem;font-weight:500;padding:7px 14px;border-radius:8px;transition:all 0.2s;border:1px solid transparent;}
+nav a:hover{color:var(--accent);background:rgba(99,179,237,0.08);border-color:rgba(99,179,237,0.2);}
+
+.header-actions{display:flex;gap:10px;align-items:center;}
+.btn-play{background:linear-gradient(135deg,var(--accent),#3b82f6);color:#fff;padding:8px 18px;border-radius:8px;font-weight:600;font-size:0.82rem;border:none;cursor:pointer;transition:all 0.3s;box-shadow:0 4px 15px rgba(99,179,237,0.3);}
+.btn-play:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(99,179,237,0.4);}
+
+/* ===== HERO ===== */
+.hero{position:relative;z-index:5;padding:70px 24px 50px;text-align:center;max-width:800px;margin:0 auto;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(99,179,237,0.08);border:1px solid rgba(99,179,237,0.25);padding:6px 16px;border-radius:50px;font-size:0.72rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--easy);animation:blink 1.4s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.hero h1{font-family:'Orbitron',monospace;font-size:clamp(2.2rem,5vw,3.8rem);font-weight:900;line-height:1.08;margin-bottom:20px;letter-spacing:-1px;}
+.hero h1 .line1{background:linear-gradient(90deg,#63b3ed,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero h1 .line2{background:linear-gradient(90deg,var(--accent2),var(--red));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.hero p{color:var(--muted);font-size:1rem;line-height:1.7;max-width:560px;margin:0 auto 32px;}
+.hero-stats{display:flex;gap:32px;justify-content:center;flex-wrap:wrap;}
+.stat{text-align:center;}
+.stat-num{font-family:'Orbitron',monospace;font-size:1.6rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.stat-label{font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+
+/* ===== MAIN LAYOUT ===== */
+.main-wrap{position:relative;z-index:5;max-width:1400px;margin:0 auto;padding:0 24px 60px;display:grid;grid-template-columns:1fr 300px;gap:28px;}
+@media(max-width:1100px){.main-wrap{grid-template-columns:1fr;}}
+
+/* ===== GAME OF THE DAY ===== */
+.gotd{background:linear-gradient(135deg,#0f1729,#1a1040);border:1px solid rgba(99,179,237,0.2);border-radius:20px;overflow:hidden;margin-bottom:28px;position:relative;}
+.gotd::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),#a78bfa,var(--accent2));}
+.gotd-inner{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+@media(max-width:700px){.gotd-inner{grid-template-columns:1fr;}}
+.gotd-visual{background:linear-gradient(135deg,#1a237e,#311b92);min-height:260px;display:flex;align-items:center;justify-content:center;font-size:6rem;position:relative;overflow:hidden;}
+.gotd-visual::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(99,179,237,0.15),transparent 70%);}
+.gotd-badge{position:absolute;top:16px;left:16px;background:linear-gradient(135deg,#f6ad55,#ed8936);color:#1a1a1a;font-size:0.65rem;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;z-index:2;}
+.gotd-info{padding:32px 28px;display:flex;flex-direction:column;justify-content:center;}
+.gotd-cat{font-size:0.68rem;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.gotd-title{font-family:'Orbitron',monospace;font-size:1.5rem;font-weight:700;margin-bottom:12px;line-height:1.2;}
+.gotd-desc{color:var(--muted);font-size:0.88rem;line-height:1.6;margin-bottom:20px;}
+.gotd-meta{display:flex;gap:16px;margin-bottom:24px;flex-wrap:wrap;}
+.meta-chip{display:flex;align-items:center;gap:6px;font-size:0.75rem;color:var(--muted);}
+.meta-chip span{color:var(--text);}
+.difficulty-badge{padding:3px 10px;border-radius:20px;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;}
+.d-easy{background:rgba(104,211,145,0.15);color:var(--easy);}
+.d-hard{background:rgba(246,173,85,0.15);color:var(--hard);}
+.d-insane{background:rgba(252,129,129,0.15);color:var(--insane);}
+.btn-gotd{background:linear-gradient(135deg,var(--accent),#3b82f6);color:#fff;padding:12px 24px;border-radius:10px;font-weight:700;font-size:0.88rem;border:none;cursor:pointer;transition:all 0.3s;box-shadow:0 4px 20px rgba(99,179,237,0.3);width:fit-content;}
+.btn-gotd:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(99,179,237,0.4);}
+
+/* ===== FILTERS ===== */
+.filters-bar{display:flex;gap:10px;align-items:center;margin-bottom:24px;flex-wrap:wrap;}
+.filter-label{font-size:0.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-right:4px;}
+.filter-btn{padding:7px 16px;border-radius:8px;font-size:0.78rem;font-weight:600;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;}
+.filter-btn:hover,.filter-btn.active{background:rgba(99,179,237,0.1);color:var(--accent);border-color:rgba(99,179,237,0.3);}
+.filter-btn.f-easy.active{background:rgba(104,211,145,0.1);color:var(--easy);border-color:rgba(104,211,145,0.3);}
+.filter-btn.f-hard.active{background:rgba(246,173,85,0.1);color:var(--hard);border-color:rgba(246,173,85,0.3);}
+.filter-btn.f-insane.active{background:rgba(252,129,129,0.1);color:var(--insane);border-color:rgba(252,129,129,0.3);}
+.search-box{margin-left:auto;position:relative;}
+.search-box input{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 16px 8px 36px;color:var(--text);font-size:0.82rem;font-family:'DM Sans',sans-serif;outline:none;transition:all 0.2s;width:200px;}
+.search-box input:focus{border-color:rgba(99,179,237,0.4);background:rgba(99,179,237,0.05);}
+.search-box::before{content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:0.8rem;}
+
+/* ===== GAMES GRID ===== */
+.section-head{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.section-title{font-family:'Orbitron',monospace;font-size:1rem;font-weight:700;letter-spacing:1px;}
+.section-count{font-size:0.72rem;color:var(--muted);background:var(--surface2);padding:3px 10px;border-radius:20px;}
+.section-line{flex:1;height:1px;background:var(--border);}
+
+.games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;}
+
+.game-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:all 0.3s;position:relative;animation:cardIn 0.4s ease both;}
+@keyframes cardIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.game-card:hover{transform:translateY(-5px);border-color:rgba(99,179,237,0.25);box-shadow:0 12px 40px rgba(0,0,0,0.4);}
+.game-card.hidden{display:none;}
+
+.game-thumb{height:120px;display:flex;align-items:center;justify-content:center;font-size:3.2rem;position:relative;transition:transform 0.3s;}
+.game-card:hover .game-thumb{transform:scale(1.08);}
+
+.game-play-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.25s;backdrop-filter:blur(4px);}
+.game-card:hover .game-play-overlay{opacity:1;}
+.play-btn-big{width:44px;height:44px;background:linear-gradient(135deg,var(--accent),#3b82f6);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:0 4px 20px rgba(99,179,237,0.5);}
+
+.game-info{padding:14px 14px 16px;}
+.game-name{font-weight:700;font-size:0.88rem;margin-bottom:4px;line-height:1.3;}
+.game-type{font-size:0.7rem;color:var(--muted);margin-bottom:10px;}
+.game-footer{display:flex;justify-content:space-between;align-items:center;}
+.game-rating{font-size:0.72rem;color:var(--accent2);}
+.game-plays{font-size:0.68rem;color:var(--muted);}
+
+/* ===== SIDEBAR ===== */
+.sidebar{display:flex;flex-direction:column;gap:20px;}
+
+/* AD SIDEBAR */
+.ad-sidebar .ad-placeholder{width:300px;height:250px;max-width:100%;border-radius:12px;}
+.ad-sidebar-tall .ad-placeholder{width:300px;height:600px;max-width:100%;border-radius:12px;}
+
+.sidebar-panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+.sp-head{padding:16px 18px;border-bottom:1px solid var(--border);font-family:'Orbitron',monospace;font-size:0.78rem;font-weight:700;letter-spacing:1px;display:flex;align-items:center;gap:8px;}
+.sp-body{padding:16px 18px;}
+
+/* LEADERBOARD */
+.lb-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.lb-item:last-child{border-bottom:none;}
+.lb-rank{font-family:'Orbitron',monospace;font-size:0.8rem;font-weight:700;width:24px;text-align:center;color:var(--muted);}
+.lb-rank.gold{color:var(--accent2);}
+.lb-rank.silver{color:#a0aec0;}
+.lb-rank.bronze{color:#c05621;}
+.lb-avatar{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;}
+.lb-name{flex:1;font-size:0.82rem;font-weight:600;}
+.lb-score{font-size:0.72rem;color:var(--accent);font-weight:600;}
+
+/* CATEGORIES */
+.cat-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:color 0.2s;}
+.cat-item:last-child{border-bottom:none;}
+.cat-item:hover .cat-name{color:var(--accent);}
+.cat-name{font-size:0.85rem;font-weight:500;}
+.cat-icon{font-size:1rem;margin-right:8px;}
+.cat-count{background:var(--surface2);padding:2px 8px;border-radius:10px;font-size:0.7rem;color:var(--muted);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(12px);}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface2);border:1px solid rgba(99,179,237,0.2);border-radius:24px;width:90%;max-width:700px;max-height:90vh;overflow:hidden;animation:modalPop 0.3s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes modalPop{from{opacity:0;transform:scale(0.88);}to{opacity:1;transform:scale(1);}}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.modal-title{font-family:'Orbitron',monospace;font-size:1rem;font-weight:700;}
+.modal-close{background:rgba(255,255,255,0.08);border:none;color:var(--text);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;}
+.modal-body{padding:24px;}
+.game-frame-area{background:#000;border-radius:12px;aspect-ratio:16/10;display:flex;align-items:center;justify-content:center;font-size:3rem;margin-bottom:16px;border:1px solid var(--border);position:relative;overflow:hidden;}
+.game-coming{font-size:0.9rem;color:var(--muted);text-align:center;}
+.game-coming strong{color:var(--accent);display:block;margin-bottom:6px;font-family:'Orbitron',monospace;}
+.ad-interstitial{text-align:center;margin-top:16px;}
+.ad-interstitial .ad-placeholder{width:100%;height:90px;border-radius:10px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;z-index:600;background:var(--surface2);border:1px solid rgba(104,211,145,0.3);border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:10px;transform:translateY(80px);opacity:0;transition:all 0.35s cubic-bezier(0.34,1.56,0.64,1);box-shadow:0 8px 30px rgba(0,0,0,0.5);}
+.toast.show{transform:translateY(0);opacity:1;}
+
+/* FOOTER */
+footer{position:relative;z-index:5;border-top:1px solid var(--border);padding:40px 24px;background:var(--surface);}
+.footer-inner{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;}
+@media(max-width:768px){.footer-inner{grid-template-columns:1fr 1fr;}}
+.footer-brand .logo-name{font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:700;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.footer-brand p{color:var(--muted);font-size:0.82rem;line-height:1.7;margin-top:10px;max-width:260px;}
+.footer-col h4{font-size:0.72rem;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:14px;font-weight:700;}
+.footer-col a{display:block;color:var(--muted);text-decoration:none;font-size:0.82rem;padding:4px 0;transition:color 0.2s;}
+.footer-col a:hover{color:var(--accent);}
+.footer-bottom{max-width:1400px;margin:30px auto 0;padding-top:20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;font-size:0.75rem;color:var(--muted);}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  nav{display:none;}
+  .gotd-inner{grid-template-columns:1fr;}
+  .games-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));}
+  .search-box input{width:150px;}
+  .hero{padding:40px 24px 30px;}
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<!-- ====== ADSENSE TOP BANNER ====== -->
+<div class="ad-top">
+  <div class="ad-placeholder">
+    <!-- REPLACE WITH: <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-XXXXXXXX" data-ad-slot="XXXXXXXX"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script> -->
+    📢 ADSENSE LEADERBOARD 728×90 — Top Banner
+  </div>
+</div>
+
+<!-- ====== HEADER ====== -->
+<header>
+  <div class="header-inner">
+    <a class="logo" href="#">
+      <div class="logo-mark">B²</div>
+      <div>
+        <div class="logo-name">BrainBlast</div>
+        <div class="logo-sub">Logic & Puzzle Games</div>
+      </div>
+    </a>
+    <nav>
+      <a href="#games">All Games</a>
+      <a href="#categories">Categories</a>
+      <a href="#leaderboard">Leaderboard</a>
+      <a href="#about">About</a>
+    </nav>
+    <div class="header-actions">
+      <button class="btn-play" onclick="showToast('🎮','Sign up to save your scores!')">Sign Up Free</button>
+    </div>
+  </div>
+</header>
+
+<!-- ====== HERO ====== -->
+<div class="hero" style="position:relative;z-index:5;">
+  <div class="hero-eyebrow">
+    <div class="live-dot"></div>
+    25 Brain-Bending Games — Free to Play
+  </div>
+  <h1>
+    <div class="line1">Train Your Brain.</div>
+    <div class="line2">Break Your Limits.</div>
+  </h1>
+  <p>Logic puzzles, escape rooms, physics challenges & memory games — all in one place. No downloads. No logins. Just pure brain power.</p>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">25</div><div class="stat-label">Games</div></div>
+    <div class="stat"><div class="stat-num">3</div><div class="stat-label">Difficulty Levels</div></div>
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Free</div></div>
+    <div class="stat"><div class="stat-num">0</div><div class="stat-label">Downloads</div></div>
+  </div>
+</div>
+
+<!-- ====== MAIN LAYOUT ====== -->
+<div class="main-wrap">
+  <div>
+
+    <!-- GAME OF THE DAY -->
+    <div class="gotd">
+      <div class="gotd-inner">
+        <div class="gotd-visual" style="background:linear-gradient(135deg,#0d1b4b,#1a0a4b);">
+          🧩
+          <div class="gotd-badge">⭐ Game of the Day</div>
+        </div>
+        <div class="gotd-info">
+          <div class="gotd-cat">🧠 Logic Puzzle</div>
+          <div class="gotd-title">The Einstein Grid</div>
+          <div class="gotd-desc">A classic 5×5 logic deduction puzzle. Use clues to determine who owns which house, pet, drink, and cigarette. Loved by puzzle masters worldwide.</div>
+          <div class="gotd-meta">
+            <span class="difficulty-badge d-insane">💀 Insane</span>
+            <div class="meta-chip">⏱ <span>Avg 18 min</span></div>
+            <div class="meta-chip">⭐ <span>4.9 / 5</span></div>
+            <div class="meta-chip">🎮 <span>24.5K plays</span></div>
+          </div>
+          <button class="btn-gotd" onclick="openGame('The Einstein Grid','🧩')">▶ Play Now — Free</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTERS -->
+    <div id="games">
+      <div class="filters-bar">
+        <span class="filter-label">Filter:</span>
+        <button class="filter-btn active" onclick="filterGames('all',this)">All</button>
+        <button class="filter-btn f-easy" onclick="filterGames('easy',this)">🟢 Easy</button>
+        <button class="filter-btn f-hard" onclick="filterGames('hard',this)">🟡 Hard</button>
+        <button class="filter-btn f-insane" onclick="filterGames('insane',this)">🔴 Insane</button>
+        <div class="search-box">
+          <input type="text" placeholder="Search games..." oninput="searchGames(this.value)">
+        </div>
+      </div>
+
+      <div class="section-head">
+        <div class="section-title">All Games</div>
+        <div class="section-count" id="gameCount">25 games</div>
+        <div class="section-line"></div>
+      </div>
+
+      <div class="games-grid" id="gamesGrid"></div>
+    </div>
+
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- AD SIDEBAR 300x250 -->
+    <div class="ad-sidebar">
+      <div class="ad-placeholder" style="width:100%;height:250px;border-radius:12px;">
+        <!-- REPLACE:
+        <ins class="adsbygoogle" style="display:block;width:300px;height:250px" data-ad-client="ca-pub-XXXXXXXX" data-ad-slot="XXXXXXXX"></ins>
+        -->
+        📢 ADSENSE 300×250
+      </div>
+    </div>
+
+    <!-- LEADERBOARD -->
+    <div class="sidebar-panel" id="leaderboard">
+      <div class="sp-head">🏆 Top Players</div>
+      <div class="sp-body">
+        <div class="lb-item">
+          <div class="lb-rank gold">1</div>
+          <div class="lb-avatar" style="background:linear-gradient(135deg,#f6ad55,#ed8936)">🦁</div>
+          <div class="lb-name">PuzzleMaster_PK</div>
+          <div class="lb-score">48,200</div>
+        </div>
+        <div class="lb-item">
+          <div class="lb-rank silver">2</div>
+          <div class="lb-avatar" style="background:linear-gradient(135deg,#a0aec0,#718096)">🦊</div>
+          <div class="lb-name">LogicNinja</div>
+          <div class="lb-score">41,750</div>
+        </div>
+        <div class="lb-item">
+          <div class="lb-rank bronze">3</div>
+          <div class="lb-avatar" style="background:linear-gradient(135deg,#c05621,#9c4221)">🐺</div>
+          <div class="lb-name">BrainStorm99</div>
+          <div class="lb-score">38,400</div>
+        </div>
+        <div class="lb-item">
+          <div class="lb-rank">4</div>
+          <div class="lb-avatar" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8)">🦅</div>
+          <div class="lb-name">QuizKing_LHR</div>
+          <div class="lb-score">35,100</div>
+        </div>
+        <div class="lb-item">
+          <div class="lb-rank">5</div>
+          <div class="lb-avatar" style="background:linear-gradient(135deg,#10b981,#059669)">🐉</div>
+          <div class="lb-name">EscapeArtist</div>
+          <div class="lb-score">31,800</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CATEGORIES -->
+    <div class="sidebar-panel" id="categories">
+      <div class="sp-head">🗂 Categories</div>
+      <div class="sp-body">
+        <div class="cat-item" onclick="filterGames('all')"><span class="cat-icon">🎮</span><span class="cat-name">All Games</span><span class="cat-count">25</span></div>
+        <div class="cat-item"><span class="cat-icon">🧩</span><span class="cat-name">Logic Puzzles</span><span class="cat-count">7</span></div>
+        <div class="cat-item"><span class="cat-icon">⚗️</span><span class="cat-name">Physics Games</span><span class="cat-count">5</span></div>
+        <div class="cat-item"><span class="cat-icon">🔐</span><span class="cat-name">Escape Rooms</span><span class="cat-count">4</span></div>
+        <div class="cat-item"><span class="cat-icon">🧠</span><span class="cat-name">Memory Games</span><span class="cat-count">4</span></div>
+        <div class="cat-item"><span class="cat-icon">🔢</span><span class="cat-name">Math Challenges</span><span class="cat-count">3</span></div>
+        <div class="cat-item"><span class="cat-icon">🗺</span><span class="cat-name">Mazes</span><span class="cat-count">2</span></div>
+      </div>
+    </div>
+
+    <!-- AD SIDEBAR TALL 300x600 -->
+    <div class="ad-sidebar-tall">
+      <div class="ad-placeholder" style="width:100%;height:600px;border-radius:12px;">
+        <!-- REPLACE:
+        <ins class="adsbygoogle" style="display:block;width:300px;height:600px" data-ad-client="ca-pub-XXXXXXXX" data-ad-slot="XXXXXXXX"></ins>
+        -->
+        📢 ADSENSE 300×600<br>Half Page Ad
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo-name">BrainBlast</div>
+      <p>The ultimate brain training platform. 25 free HTML5 puzzle & logic games. No downloads, no logins — just play.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Games</h4>
+      <a href="#">Logic Puzzles</a>
+      <a href="#">Escape Rooms</a>
+      <a href="#">Physics Games</a>
+      <a href="#">Memory Games</a>
+      <a href="#">Math Challenges</a>
+    </div>
+    <div class="footer-col">
+      <h4>Site</h4>
+      <a href="#">Home</a>
+      <a href="#">Leaderboard</a>
+      <a href="#">Categories</a>
+      <a href="#">Submit a Game</a>
+    </div>
+    <div class="footer-col">
+      <h4>Legal</h4>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Use</a>
+      <a href="#">Cookie Policy</a>
+      <a href="#">Contact Us</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2026 BrainBlast — All rights reserved</div>
+    <div>Built with HTML5 · Deployed on GitHub Pages</div>
+  </div>
+</footer>
+
+<!-- GAME MODAL -->
+<div class="modal-overlay" id="gameModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Game Title</div>
+      <button class="modal-close" onclick="closeGame()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="game-frame-area" id="gameFrame">
+        <div style="text-align:center;">
+          <div style="font-size:4rem;margin-bottom:16px;" id="gameEmoji">🎮</div>
+          <div class="game-coming">
+            <strong>Integration Ready!</strong>
+            Drop your HTML5 game file here.<br>
+            Replace this div with:<br>
+            <code style="color:var(--accent);font-size:0.8rem;">&lt;iframe src="games/game-name/index.html"&gt;</code>
+          </div>
+        </div>
+      </div>
+      <!-- INTERSTITIAL AD PLACEHOLDER -->
+      <div class="ad-interstitial">
+        <div class="ad-placeholder" style="width:100%;height:90px;border-radius:10px;">
+          <!-- REPLACE WITH ADSENSE IN-GAME INTERSTITIAL -->
+          📢 In-Game Ad 728×90 — ADSENSE INTERSTITIAL
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span id="toastIcon">🎮</span>
+  <div>
+    <div style="font-weight:700;font-size:0.88rem;" id="toastMsg">Loading game...</div>
+  </div>
+</div>
+
+<script>
+// ========= 25 GAMES DATA =========
+const GAMES = [
+  // EASY
+  { id:1, name:"Memory Matrix",      emoji:"🧠", type:"Memory Game",       diff:"easy",   rating:"4.7", plays:"18.2K", color:"#1a3a4a", src:"games/memory-matrix/index.html" },
+  { id:2, name:"Color Match Rush",   emoji:"🎨", type:"Pattern Recognition", diff:"easy",  rating:"4.5", plays:"22.1K", color:"#1a2a3a", src:"games/color-match/index.html" },
+  { id:3, name:"Number Sequence",    emoji:"🔢", type:"Math Puzzle",         diff:"easy",  rating:"4.4", plays:"14.8K", color:"#1a3a2a", src:"games/number-seq/index.html" },
+  { id:4, name:"Tile Slider",        emoji:"🔲", type:"Sliding Puzzle",      diff:"easy",  rating:"4.6", plays:"31.4K", color:"#2a1a3a", src:"games/tile-slider/index.html" },
+  { id:5, name:"Simon Says Pro",     emoji:"💡", type:"Memory Sequence",     diff:"easy",  rating:"4.8", plays:"44.0K", color:"#3a2a1a", src:"games/simon/index.html" },
+  { id:6, name:"Word Maze",          emoji:"🔡", type:"Word Puzzle",         diff:"easy",  rating:"4.3", plays:"19.6K", color:"#1a3a3a", src:"games/word-maze/index.html" },
+  { id:7, name:"Dot Connect",        emoji:"⚫", type:"Logic Connector",     diff:"easy",  rating:"4.5", plays:"25.3K", color:"#2a3a1a", src:"games/dot-connect/index.html" },
+  { id:8, name:"Shape Shifter",      emoji:"🔷", type:"Spatial Reasoning",   diff:"easy",  rating:"4.2", plays:"12.7K", color:"#1a1a3a", src:"games/shape-shift/index.html" },
+
+  // HARD
+  { id:9,  name:"Pipe Connector",    emoji:"🔧", type:"Physics Puzzle",      diff:"hard",  rating:"4.7", plays:"28.9K", color:"#3a1a1a", src:"games/pipe/index.html" },
+  { id:10, name:"Bridge Builder",    emoji:"🌉", type:"Physics Simulation",  diff:"hard",  rating:"4.8", plays:"36.1K", color:"#1a3a1a", src:"games/bridge/index.html" },
+  { id:11, name:"Escape Room I",     emoji:"🔐", type:"Escape Room",         diff:"hard",  rating:"4.9", plays:"52.4K", color:"#2a1a1a", src:"games/escape1/index.html" },
+  { id:12, name:"Sudoku Master",     emoji:"9️⃣", type:"Number Logic",         diff:"hard",  rating:"4.6", plays:"61.2K", color:"#1a2a1a", src:"games/sudoku/index.html" },
+  { id:13, name:"Nonogram Grid",     emoji:"📊", type:"Picture Logic",       diff:"hard",  rating:"4.7", plays:"23.5K", color:"#2a2a1a", src:"games/nonogram/index.html" },
+  { id:14, name:"Tower of Hanoi",    emoji:"🗼", type:"Mathematical Puzzle",  diff:"hard",  rating:"4.5", plays:"17.8K", color:"#1a1a2a", src:"games/hanoi/index.html" },
+  { id:15, name:"Maze Runner 3D",    emoji:"🌀", type:"3D Maze",             diff:"hard",  rating:"4.6", plays:"39.7K", color:"#2a1a2a", src:"games/maze3d/index.html" },
+  { id:16, name:"Chess Puzzles",     emoji:"♟️", type:"Chess Logic",          diff:"hard",  rating:"4.8", plays:"44.3K", color:"#1a2a2a", src:"games/chess/index.html" },
+  { id:17, name:"Cryptogram",        emoji:"🔒", type:"Code Breaking",       diff:"hard",  rating:"4.4", plays:"15.6K", color:"#2a1a3a", src:"games/crypto/index.html" },
+
+  // INSANE
+  { id:18, name:"The Einstein Grid", emoji:"🧩", type:"Logic Deduction",     diff:"insane", rating:"4.9", plays:"24.5K", color:"#0d1b4b", src:"games/einstein/index.html" },
+  { id:19, name:"Quantum Escape",    emoji:"⚛️",  type:"Escape Room Extreme", diff:"insane", rating:"4.8", plays:"18.1K", color:"#1a0d2e", src:"games/quantum/index.html" },
+  { id:20, name:"Physics Chaos",     emoji:"💥", type:"Physics Extreme",     diff:"insane", rating:"4.7", plays:"29.4K", color:"#2e0d0d", src:"games/chaos/index.html" },
+  { id:21, name:"Infinite Maze",     emoji:"♾️",  type:"Procedural Maze",     diff:"insane", rating:"4.6", plays:"33.8K", color:"#0d2e1a", src:"games/inf-maze/index.html" },
+  { id:22, name:"IQ Test Ultimate",  emoji:"🎓", type:"IQ Challenge",        diff:"insane", rating:"4.9", plays:"71.2K", color:"#2e2e0d", src:"games/iq-test/index.html" },
+  { id:23, name:"Code Breaker X",    emoji:"💻", type:"Programming Logic",   diff:"insane", rating:"4.8", plays:"16.3K", color:"#0d0d2e", src:"games/codebreak/index.html" },
+  { id:24, name:"Dark Escape Room",  emoji:"🕯️",  type:"Horror Escape",       diff:"insane", rating:"4.7", plays:"42.6K", color:"#1a0a0a", src:"games/dark-escape/index.html" },
+  { id:25, name:"Mastermind Pro",    emoji:"🎯", type:"Color Logic Deduction",diff:"insane",rating:"4.9", plays:"38.9K", color:"#0a1a0a", src:"games/mastermind/index.html" },
+];
+
+const diffColors = { easy:'var(--easy)', hard:'var(--hard)', insane:'var(--insane)' };
+const diffLabels = { easy:'🟢 Easy', hard:'🟡 Hard', insane:'🔴 Insane' };
+
+function renderGames(list) {
+  const grid = document.getElementById('gamesGrid');
+  document.getElementById('gameCount').textContent = list.length + ' games';
+  grid.innerHTML = list.map((g, i) => `
+    <div class="game-card" data-diff="${g.diff}" data-name="${g.name.toLowerCase()}" style="animation-delay:${i*0.04}s" onclick="openGame('${g.name}','${g.emoji}','${g.src}')">
+      <div class="game-thumb" style="background:linear-gradient(135deg,${g.color},${g.color}88);">
+        ${g.emoji}
+        <div class="game-play-overlay">
+          <div class="play-btn-big">▶</div>
+        </div>
+      </div>
+      <div class="game-info">
+        <div class="game-name">${g.name}</div>
+        <div class="game-type">${g.type}</div>
+        <div class="game-footer">
+          <span class="difficulty-badge d-${g.diff}" style="font-size:0.62rem;padding:2px 7px;">${diffLabels[g.diff]}</span>
+          <span class="game-rating">⭐ ${g.rating}</span>
+        </div>
+        <div class="game-plays" style="margin-top:6px;font-size:0.68rem;color:var(--muted);">🎮 ${g.plays} plays</div>
+      </div>
+    </div>`).join('');
+}
+
+let currentFilter = 'all';
+let currentSearch = '';
+
+function filterGames(diff, btn) {
+  currentFilter = diff;
+  if (btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  applyFilters();
+}
+
+function searchGames(val) {
+  currentSearch = val.toLowerCase();
+  applyFilters();
+}
+
+function applyFilters() {
+  let list = GAMES;
+  if (currentFilter !== 'all') list = list.filter(g => g.diff === currentFilter);
+  if (currentSearch) list = list.filter(g => g.name.toLowerCase().includes(currentSearch) || g.type.toLowerCase().includes(currentSearch));
+  renderGames(list);
+}
+
+function openGame(name, emoji, src) {
+  document.getElementById('modalTitle').textContent = name;
+  document.getElementById('gameEmoji').textContent = emoji;
+  document.getElementById('gameModal').classList.add('open');
+  // In production, replace inner div with:
+  // document.getElementById('gameFrame').innerHTML = `<iframe src="${src}" width="100%" height="100%" frameborder="0" allowfullscreen></iframe>`;
+}
+
+function closeGame() {
+  document.getElementById('gameModal').classList.remove('open');
+}
+
+function showToast(icon, msg) {
+  document.getElementById('toastIcon').textContent = icon;
+  document.getElementById('toastMsg').textContent = msg;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// Click outside modal to close
+document.getElementById('gameModal').addEventListener('click', function(e) {
+  if (e.target === this) closeGame();
+});
+
+// Init
+renderGames(GAMES);
+</script>
+
+<!-- ===================================================
+DEPLOYMENT GUIDE (Read this comment block!)
+=====================================================
+
+🚀 STEP-BY-STEP DEPLOYMENT GUIDE
+==================================
+
+STACK: Pure HTML5 + CSS + JavaScript (No backend needed!)
+HOSTING: GitHub Pages (FREE) or any cPanel hosting
+
+--- FOLDER STRUCTURE ---
+your-project/
+│
+├── index.html          ← This file (your homepage)
+├── games/
+│   ├── einstein/
+│   │   └── index.html  ← Game file (HTML5 game)
+│   ├── memory-matrix/
+│   │   └── index.html
+│   ├── sudoku/
+│   │   └── index.html
+│   └── ... (25 game folders)
+└── assets/
+    └── thumbnails/     ← Game thumbnail images (optional)
+
+--- WHERE TO GET FREE HTML5 GAMES ---
+1. GitHub.com — search "html5 puzzle game"
+2. itch.io — free game assets section
+3. OpenGameArt.org
+4. GameDistribution.com (licensed HTML5 games)
+5. Itch.io game jams — many free puzzle games
+
+--- TOP 25 OPEN SOURCE GAMES TO USE ---
+1.  2048 Clone — github.com/gabrielecirulli/2048
+2.  Sudoku — github.com/robatron/sudoku.js
+3.  Minesweeper — github.com/tokyoshoes/minesweeper
+4.  Simon Says — github.com/no1xsyzy/simon-says
+5.  Tetris Clone — github.com/nickdesaulniers/tetris
+6.  Chess Puzzles — lichess.org embed
+7.  Pipe Puzzle — github.com/nicktindall/pipegame
+8.  Nonogram — github.com (search nonogram js)
+9.  Tower of Hanoi — codepen open source
+10. Mastermind — github.com/RobinLinus/mastermind
+11. Sliding Puzzle — github.com (search 15 puzzle html5)
+12. Memory Cards — github.com (search memory card game js)
+13. Maze Generator — github.com/nelsons/mazegenerator
+14. Escape Room — gamejolt.com free HTML5 escape rooms
+15. Word Maze — github.com (search word search js)
+... and 10 more from itch.io free jam games
+
+--- ADSENSE SETUP ---
+1. Apply at google.com/adsense
+2. Get approved (takes 1-2 weeks)
+3. Replace ad-placeholder divs with your AdSense code:
+   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOURCODE" crossorigin="anonymous"></script>
+   <ins class="adsbygoogle" style="display:block;width:728px;height:90px" data-ad-client="ca-pub-YOURCODE" data-ad-slot="YOURSLOT"></ins>
+   <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+
+--- GITHUB PAGES DEPLOY ---
+1. Create repo: brain-blast-games
+2. Upload all files (index.html + games/ folder)
+3. Settings → Pages → Branch: main → Save
+4. Live at: yourusername.github.io/brain-blast-games
+
+--- CPANEL HOSTING DEPLOY ---
+1. Buy hosting from Namecheap ($2/mo) or Hostinger ($2/mo)
+2. Register domain (brainblast.games or similar)
+3. Open cPanel → File Manager → public_html
+4. Upload all files via File Manager or FTP (FileZilla)
+5. Done! Visit yoursite.com
+
+--- SEO TIPS ---
+- Add <meta name="description"> for each game page
+- Submit sitemap to Google Search Console
+- Add Open Graph tags for social sharing
+
+=================================================== -->
+</body>
+</html>
