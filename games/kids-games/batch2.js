@@ -861,11 +861,11 @@ var listeners=[];
 function on(t,e,f){t.addEventListener(e,f);listeners.push([t,e,f]);}
 container._cleanup=function(){running=false;cancelAnimationFrame(raf);listeners.forEach(function(l){l[0].removeEventListener(l[1],l[2]);});};
 function fit(){cv.width=container.clientWidth||300;cv.height=container.clientHeight||300;layout();}
-fit();on(window,'resize',fit);
 var gy=0,anchor={x:90,y:200};
 var boxes=[],debris=[],popups=[];
 var bird={x:0,y:0,r:17,vx:0,vy:0,state:'ready',rot:0};
 var birdsLeft=5,score=0,over=false;
+fit();on(window,'resize',fit);
 function layout(){
   var W=cv.width,H=cv.height;
   gy=H-64;
