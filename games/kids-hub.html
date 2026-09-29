@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎮 Ultimate Kids Game Hub - 40 Games</title>
+    <title>🎮 Ultimate Kids Game Hub - 8 Games</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
@@ -205,7 +205,7 @@
 <body>
     <div class="header">
         <h1>🎮 Ultimate Kids Game Hub</h1>
-        <p>40 Amazing Games • 3D Graphics • Music & Sound Effects</p>
+        <p>8 Amazing Games • 3D Graphics • Music & Sound Effects</p>
         <div class="controls">
             <button class="btn" onclick="toggleMusic()">🎵 Toggle Music</button>
             <button class="btn" onclick="toggleSound()">🔊 Toggle SFX</button>
@@ -243,53 +243,7 @@
             { id: 'snooker', name: '🎱 Snooker', category: 'board', desc: 'Pool game', icon: '🎱', type: '2d' },
             { id: 'patti', name: '🃏 Teen Patti', category: 'board', desc: 'Card game', icon: '🃏', type: '2d' },
             { id: 'snake', name: '🐍 Snake', category: 'arcade', desc: 'Classic snake', icon: '🐍', type: '2d' },
-            { id: 'tetris', name: '📦 Tetris', category: 'puzzle', desc: 'Stack blocks', icon: '📦', type: '2d' },            { id: 'pacman', name: '👻 Pac-Man', category: 'arcade', desc: 'Eat dots', icon: '👻', type: '2d' },
-            { id: 'flappy', name: '🐦 Flappy Bird', category: 'arcade', desc: 'Fly through', icon: '🐦', type: '2d' },
-            { id: 'racing', name: '🏎️ Car Racing', category: 'arcade', desc: 'Speed race', icon: '🏎️', type: '3d' },
-            { id: 'shooter', name: '🚀 Space Shooter', category: 'arcade', desc: 'Shoot aliens', icon: '🚀', type: '3d' },
-            { id: 'puzzle', name: '🧩 Jigsaw', category: 'puzzle', desc: 'Solve puzzles', icon: '🧩', type: '2d' },
-            { id: 'memory', name: '🧠 Memory', category: 'puzzle', desc: 'Match cards', icon: '🧠', type: '2d' },
-            { id: 'chess', name: '♟️ Chess', category: 'board', desc: 'King\'s game', icon: '♟️', type: '2d' },
-            { id: 'checkers', name: '⚫ Checkers', category: 'board', desc: 'Jump & capture', icon: '⚫', type: '2d' },
-            { id: 'tictactoe', name: '⭕ Tic Tac Toe', category: 'board', desc: 'X vs O', icon: '⭕', type: '2d' },
-            { id: 'basketball', name: '🏀 Basketball', category: 'sports', desc: 'Shoot hoops', icon: '🏀', type: '3d' },
-            { id: 'tennis', name: '🎾 Tennis', category: 'sports', desc: 'Tennis match', icon: '🎾', type: '2d' },
-            { id: 'golf', name: '⛳ Golf', category: 'sports', desc: 'Hole in one', icon: '⛳', type: '2d' },
-            { id: 'bowling', name: '🎳 Bowling', category: 'sports', desc: 'Strike!', icon: '🎳', type: '3d' },
-            { id: 'fishing', name: '🎣 Fishing', category: 'arcade', desc: 'Catch fish', icon: '🎣', type: '2d' },
-            { id: 'cooking', name: ' Cooking', category: 'arcade', desc: 'Chef game', icon: '🍳', type: '2d' },
-            { id: 'dressup', name: '👗 Dress Up', category: 'arcade', desc: 'Fashion game', icon: '👗', type: '2d' },
-            { id: 'painting', name: '🎨 Painting', category: 'arcade', desc: 'Draw & paint', icon: '🎨', type: '2d' },
-            { id: 'piano', name: '🎹 Piano', category: 'arcade', desc: 'Play music', icon: '🎹', type: '2d' },
-            { id: 'drums', name: '🥁 Drums', category: 'arcade', desc: 'Beat maker', icon: '🥁', type: '2d' },
-            { id: 'balloon', name: '🎈 Balloon', category: 'arcade', desc: 'Pop balloons', icon: '🎈', type: '2d' },
-            { id: 'candy', name: '🍬 Candy', category: 'puzzle', desc: 'Match 3', icon: '🍬', type: '2d' },
-            { id: 'fruit', name: '🍉 Fruit Ninja', category: 'arcade', desc: 'Slice fruits', icon: '🍉', type: '2d' },
-            { id: 'angry', name: '😠 Angry Birds', category: 'puzzle', desc: 'Launch birds', icon: '😠', type: '2d' },
-            { id: 'subway', name: '🚇 Subway', category: 'arcade', desc: 'Endless run', icon: '🚇', type: '3d' },
-            { id: 'temple', name: '🏃 Temple Run', category: 'arcade', desc: 'Run fast', icon: '🏃', type: '3d' },
-            { id: 'minecraft', name: '⛏️ Minecraft', category: 'arcade', desc: 'Build world', icon: '⛏️', type: '3d' },
-            { id: 'among', name: '👾 Among Us', category: 'arcade', desc: 'Find impostor', icon: '👾', type: '2d' },
-            { id: 'fortnite', name: '🔫 Battle Royale', category: 'arcade', desc: 'Survive', icon: '🔫', type: '3d' },
-            { id: 'roblox', name: '🎮 Roblox', category: 'arcade', desc: 'Play games', icon: '🎮', type: '3d' },
-            { id: 'mario', name: '🍄 Mario', category: 'arcade', desc: 'Jump & run', icon: '🍄', type: '2d' },
-            { id: 'sonic', name: '💙 Sonic', category: 'arcade', desc: 'Speed run', icon: '💙', type: '2d' }
-        ];
-
-        let currentGame = null;
-        let musicEnabled = true;
-        let soundEnabled = true;
-        let synth, membrane, metal;
-
-        // Initialize Tone.js
-        async function initAudio() {
-            await Tone.start();
-            synth = new Tone.PolySynth(Tone.Synth).toDestination();
-            membrane = new Tone.MembraneSynth().toDestination();
-            metal = new Tone.MetalSynth({
-                frequency: 200,
-                envelope: { attack: 0.001, decay: 0.1, release: 0.01 },
-                harmonicity: 5.1,
+                                                                                                                                                                                                                                                                                                                                                                                                    harmonicity: 5.1,
                 modulationIndex: 32,
                 resonance: 4000,
                 octaves: 1.5            }).toDestination();
