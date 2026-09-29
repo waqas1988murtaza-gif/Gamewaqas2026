@@ -243,7 +243,23 @@
             { id: 'snooker', name: '🎱 Snooker', category: 'board', desc: 'Pool game', icon: '🎱', type: '2d' },
             { id: 'patti', name: '🃏 Teen Patti', category: 'board', desc: 'Card game', icon: '🃏', type: '2d' },
             { id: 'snake', name: '🐍 Snake', category: 'arcade', desc: 'Classic snake', icon: '🐍', type: '2d' },
-                                                                                                                                                                                                                                                                                                                                                                                                    harmonicity: 5.1,
+        ];
+
+        let currentGame = null;
+        let musicEnabled = true;
+        let soundEnabled = true;
+        let synth, membrane, metal;
+
+        // Initialize Tone.js
+        async function initAudio() {
+            if (typeof Tone === 'undefined') return;
+            await Tone.start();
+            synth = new Tone.PolySynth(Tone.Synth).toDestination();
+            membrane = new Tone.MembraneSynth().toDestination();
+            metal = new Tone.MetalSynth({
+                frequency: 200,
+                envelope: { attack: 0.001, decay: 0.1, release: 0.01 },
+                harmonicity: 5.1,
                 modulationIndex: 32,
                 resonance: 4000,
                 octaves: 1.5            }).toDestination();
@@ -380,6 +396,10 @@
 
         // Game Implementations
         function loadCricket3D(container) {
+            if (typeof THREE === 'undefined') {
+                container.innerHTML = '<div style="color:#fff;text-align:center;padding:40px;">⚠️ 3D load nahi ho saka — internet check karein aur dobara kholein.</div>';
+                return;
+            }
             const canvas = document.createElement('canvas');
             container.appendChild(canvas);
             
@@ -494,6 +514,10 @@
             });        }
 
         function loadFootball3D(container) {
+            if (typeof THREE === 'undefined') {
+                container.innerHTML = '<div style="color:#fff;text-align:center;padding:40px;">⚠️ 3D load nahi ho saka — internet check karein aur dobara kholein.</div>';
+                return;
+            }
             const canvas = document.createElement('canvas');
             container.appendChild(canvas);
             
