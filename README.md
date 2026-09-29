@@ -2,16 +2,15 @@
 
 Free browser games — no download, no signup. Just open and play.
 
-**Play:** https://waqas1988murtaza-gif.github.io/Gamewaqas2026/ *(enable GitHub Pages on this repo)*
-
 ## Games
 | Game | File | Type |
 |------|------|------|
-| 🔢 2048 | `games/2048.html` | Puzzle — the viral tile-merging hit |
+| 🏎️ Waqas Racing | `games/waqas-racing.html` | Original car dodging game — my own creation |
+| 🔢 Waqas 2048 | `games/2048.html` | The viral tile-merging puzzle (rebranded) |
 | 📚 EduPlay Sindh | `games/eduplay-sindh.html` | Educational quiz for Pakistani primary students |
-| 🧒 Ultimate Kids Game Hub | `games/kids-hub.html` | 40 mini-games for kids |
+| 🧒 Kids Game Hub | `games/kids-hub.html` | 8 fully playable classics (cricket, football, ludo, carrom, snake…) |
 | 🧠 BrainBlast | `games/brainblast.html` | Arcade & logic games |
 
 ## Credits
-- 2048 via [Arcadia](https://github.com/jeffreyhamilton6399/arcadia) (MIT); original 2048 by Gabriele Cirulli (MIT)
-- EduPlay Sindh, Kids Game Hub, BrainBlast — original creations by Waqas Murtaza
+- 2048 mechanics: original by Gabriele Cirulli (MIT)
+- Waqas Racing, EduPlay Sindh, BrainBlast — original creations by Waqas Murtaza
