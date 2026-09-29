@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="theme-color" content="#061225" />
+    <meta name="description" content="City Drive — a compact neon-at-dusk 3D browser driving prototype." />
+    <title>City Drive — Neon District</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23061225'/%3E%3Cpath d='M12 42 32 11l20 31-20-8z' fill='%236df7ea'/%3E%3Ccircle cx='32' cy='34' r='6' fill='%23ff668e'/%3E%3C/svg%3E" />
+    <script type="module" crossorigin src="./assets/index-Cy0ps6R6.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-gT8sQx7f.css">
+  </head>
+  <body>
+    <canvas id="game" aria-label="City Drive game canvas"></canvas>
+    <div id="ui">
+      <section id="title-screen" class="screen-card" aria-label="City Drive start screen">
+        <p class="eyebrow">Open City // 01</p>
+        <h1 class="logo">City <span>Drive</span></h1>
+        <p class="tagline">Walk the blocks, take a car, run races, deliver a package, and lose the heat across four connected districts.</p>
+        <div class="start-meta">
+          <span class="pill">open-world slice</span>
+          <span class="pill">drive + walk</span>
+          <span class="pill">races + missions</span>
+        </div>
+        <button id="start-button" class="btn" type="button">Start the night <span aria-hidden="true">→</span></button>
+        <div class="controls"><b>Move / drive</b> <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> &nbsp; <b>Enter / exit</b> <kbd>E</kbd> &nbsp; <b>Run</b> <kbd>Shift</kbd> &nbsp; <b>Pause</b> <kbd>Esc</kbd></div>
+      </section>
+
+      <div id="hud" class="is-hidden" aria-live="polite">
+        <div class="hud-top">
+          <div class="hud-brand">CITY <span>DRIVE</span> <small>// open city</small></div>
+          <div class="objective">
+            <small><span id="mode-value">FREE</span> // <span id="district-value">CENTRAL AVENUE</span></small>
+            <div class="objective-line"><span id="mission-value">0 / 3</span><span id="objective-value">FREE ROAM</span></div>
+            <div class="objective-line"><span>Distance</span><span id="distance-value">— m</span></div>
+            <div class="objective-line"><span>Wanted</span><span id="wanted-value">☆☆☆</span></div>
+          </div>
+        </div>
+        <div id="toast"></div>
+        <div class="bottom-hud">
+          <div class="speedometer">
+            <div class="speed-number" id="speed-value">000</div>
+            <div class="speed-unit">km/h</div>
+            <div class="gear" id="gear-value">N</div>
+          </div>
+          <div class="map-shell"><canvas id="mini-map" width="180" height="180"></canvas><div class="map-caption">district map</div></div>
+        </div>
+        <div class="mobile-controls" aria-label="Touch driving controls">
+          <button class="touch-btn touch-steer" data-touch="left" type="button" aria-label="Steer left">←</button>
+          <button class="touch-btn touch-gas" data-touch="w" type="button" aria-label="Accelerate">▲</button>
+          <button class="touch-btn touch-brake" data-touch="s" type="button" aria-label="Brake or reverse">▼</button>
+          <button class="touch-btn touch-steer" data-touch="right" type="button" aria-label="Steer right">→</button>
+        </div>
+        <div id="context-hint" class="hud-hint">WASD to walk // E near the car to drive</div>
+      </div>
+
+      <section id="pause-panel" class="pause-card is-hidden" aria-label="Paused">
+        <p class="eyebrow">City suspended</p>
+        <h2>Paused in the district.</h2>
+        <p>The traffic and missions are waiting. Resume when you're ready.</p>
+        <div class="pause-actions"><button id="resume-button" class="btn" type="button">Resume</button><button data-reset class="btn btn-secondary" type="button">Reset run</button></div>
+      </section>
+
+      <section id="complete-panel" class="complete-card is-hidden" aria-label="Route complete">
+        <p class="eyebrow">City complete // all districts</p>
+        <h2>You ran the city.</h2>
+        <p>Race, delivery, and heat all cleared. Reset the slice and find a cleaner line through downtown.</p>
+        <div class="complete-score">3 / 3 missions complete</div>
+        <button data-reset class="btn" type="button">Run it again <span aria-hidden="true">↗</span></button>
+      </section>
+    </div>
+  </body>
+</html>
