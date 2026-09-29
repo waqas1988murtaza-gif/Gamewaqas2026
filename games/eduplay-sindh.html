@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 EduPlay Sindh - Upgraded</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --pink: #ff4d8d;
+    --purple: #7c3aed;
+    --blue: #2563eb;
+    --yellow: #fbbf24;
+    --green: #22c55e;
+    --red: #ef4444;
+    --bg1: #fdf4ff;
+    --bg2: #ffe4f0;
+  }
+
+  body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #fce4ff 0%, #ffe0f0 40%, #fff0e0 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    font-family: 'Nunito', 'Comic Sans MS', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Floating stars background */
+  .stars-bg {
+    position: fixed; top:0; left:0; width:100%; height:100%;
+    pointer-events: none; z-index: 0;
+    overflow: hidden;
+  }
+  .star-particle {
+    position: absolute;
+    font-size: 1.2em;
+    animation: floatStar 6s infinite ease-in-out;
+    opacity: 0.4;
+  }
+  @keyframes floatStar {
+    0%,100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+  }
+
+  .container {
+    background: white;
+    border-radius: 30px;
+    box-shadow: 0 25px 70px rgba(124,58,237,0.2);
+    padding: 28px 24px;
+    max-width: 680px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    border: 4px solid #f0d4ff;
+  }
+
+  /* HEADER */
+  .game-header {
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    margin: -28px -24px 20px -24px;
+    padding: 22px 20px 18px;
+    border-radius: 26px 26px 0 0;
+    color: white;
+    position: relative;
+  }
+  .game-header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.3em;
+    letter-spacing: 1px;
+    text-shadow: 2px 3px 0 rgba(0,0,0,0.2);
+  }
+  .game-header p { font-size: 0.9em; opacity: 0.9; margin-top: 3px; }
+
+  /* MASCOT GIRL */
+  .mascot-wrap {
+    position: relative;
+    display: inline-block;
+    margin: 10px 0;
+  }
+  .mascot-girl {
+    font-size: 7.5em;
+    display: block;
+    animation: mascotBounce 2s infinite ease-in-out;
+    filter: drop-shadow(0 6px 10px rgba(0,0,0,0.15));
+  }
+  @keyframes mascotBounce {
+    0%,100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-12px) rotate(3deg); }
+  }
+
+  /* SPEECH BUBBLE */
+  .speech-bubble {
+    background: linear-gradient(135deg, #fff9c4, #fff3a0);
+    border: 3px solid var(--yellow);
+    border-radius: 20px;
+    padding: 12px 18px;
+    margin: 0 auto 15px;
+    max-width: 420px;
+    font-size: 1.05em;
+    font-weight: 700;
+    color: #5d4037;
+    position: relative;
+    line-height: 1.4;
+    animation: bubblePop 0.4s ease;
+  }
+  .speech-bubble::before {
+    content: '';
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 8px solid transparent;
+    border-bottom-color: var(--yellow);
+  }
+  @keyframes bubblePop {
+    0% { transform: scale(0.8); opacity:0; }
+    100% { transform: scale(1); opacity:1; }
+  }
+
+  /* SCREENS */
+  .screen { display: none; animation: fadeIn 0.5s; }
+  .screen.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity:0; transform: translateY(15px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    background: linear-gradient(135deg, #f3e8ff, #fce7f3);
+    border-radius: 20px;
+    padding: 12px 20px;
+    margin: 15px 0;
+    border: 2px solid #e9d5ff;
+  }
+  .stat-box { text-align: center; }
+  .stat-val { font-family: 'Fredoka One', cursive; font-size: 1.8em; color: var(--purple); }
+  .stat-lbl { font-size: 0.75em; color: #888; font-weight: 600; }
+
+  /* BUTTONS */
+  .btn {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 1em;
+    border: none;
+    border-radius: 50px;
+    padding: 12px 22px;
+    cursor: pointer;
+    margin: 5px;
+    transition: all 0.2s;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+  }
+  .btn:hover { transform: translateY(-3px) scale(1.05); }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-primary { background: linear-gradient(135deg, var(--purple), var(--pink)); color: white; }
+  .btn-back { background: #94a3b8; color: white; }
+
+  .btn-class {
+    background: linear-gradient(135deg, #f472b6, #ec4899);
+    color: white;
+    width: 130px;
+    font-size: 0.9em;
+  }
+  .btn-subject {
+    background: linear-gradient(135deg, #38bdf8, #0284c7);
+    color: white;
+    width: 165px;
+    font-size: 0.9em;
+  }
+
+  .btn-option {
+    background: white;
+    color: #333;
+    border: 3px solid #c4b5fd;
+    width: 100%;
+    max-width: 420px;
+    display: block;
+    margin: 8px auto;
+    text-align: left;
+    padding: 13px 20px;
+    border-radius: 15px;
+    font-size: 1em;
+    transition: all 0.2s;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  }
+  .btn-option:hover { border-color: var(--purple); background: #faf5ff; transform: translateX(5px); }
+  .btn-option.correct { background: #dcfce7 !important; border-color: var(--green) !important; color: #166534 !important; font-weight: 800; }
+  .btn-option.wrong   { background: #fee2e2 !important; border-color: var(--red)   !important; color: #991b1b !important; }
+
+  /* GRID */
+  .grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 18px 0; }
+
+  /* QUESTION BOX */
+  .question-box {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border: 4px dashed #f59e0b;
+    border-radius: 20px;
+    padding: 22px;
+    margin: 15px 0;
+    font-size: 1.35em;
+    font-weight: 700;
+    color: #78350f;
+    line-height: 1.4;
+  }
+
+  /* PROGRESS */
+  .progress-bar {
+    background: #e5e7eb;
+    border-radius: 10px;
+    height: 14px;
+    overflow: hidden;
+    margin: 8px 0 15px;
+    border: 2px solid #d1d5db;
+  }
+  .progress-fill {
+    background: linear-gradient(90deg, var(--green), #86efac);
+    height: 100%;
+    transition: width 0.6s ease;
+    border-radius: 10px;
+  }
+
+  /* QUIZ STATS */
+  .quiz-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f0ff;
+    border-radius: 15px;
+    padding: 10px 18px;
+    margin-bottom: 5px;
+    border: 2px solid #e9d5ff;
+  }
+  .quiz-qnum { font-family: 'Fredoka One', cursive; color: var(--purple); font-size: 1.1em; }
+  .quiz-score { font-family: 'Fredoka One', cursive; color: var(--green); font-size: 1.1em; }
+
+  /* FEEDBACK */
+  #feedback {
+    font-size: 1.3em;
+    font-weight: 800;
+    margin: 10px 0;
+    min-height: 30px;
+    transition: all 0.3s;
+  }
+
+  /* RESULT */
+  .result-box {
+    background: linear-gradient(135deg, #fdf4ff, #fff0f6);
+    border: 4px solid #f0d4ff;
+    border-radius: 25px;
+    padding: 25px;
+    margin: 10px 0;
+  }
+  .result-stars { font-size: 3.5em; margin: 10px 0; }
+  #resultTitle {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2em;
+    color: var(--purple);
+  }
+  #resultScore {
+    font-size: 1.5em;
+    font-weight: 800;
+    color: var(--pink);
+    margin: 5px 0;
+  }
+
+  /* MUSIC TOGGLE */
+  .music-btn {
+    position: absolute;
+    top: 15px;
+    right: 18px;
+    background: rgba(255,255,255,0.25);
+    border: 2px solid rgba(255,255,255,0.5);
+    color: white;
+    border-radius: 50%;
+    width: 40px; height: 40px;
+    font-size: 1.2em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    z-index: 10;
+  }
+  .music-btn:hover { background: rgba(255,255,255,0.4); transform: scale(1.1); }
+
+  /* CONFETTI */
+  .confetti-piece {
+    position: fixed;
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    animation: confettiFall 3s forwards ease-in;
+    z-index: 999;
+    pointer-events: none;
+  }
+  @keyframes confettiFall {
+    0%   { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh)  rotate(720deg); opacity: 0; }
+  }
+
+  /* BADGE */
+  .badge-earned {
+    display: inline-block;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: white;
+    border-radius: 50px;
+    padding: 6px 18px;
+    font-weight: 800;
+    font-size: 0.95em;
+    margin: 5px;
+    box-shadow: 0 3px 10px rgba(251,191,36,0.4);
+    animation: badgePop 0.5s ease;
+  }
+  @keyframes badgePop {
+    0%   { transform: scale(0); }
+    70%  { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+
+  h2 { font-family: 'Fredoka One', cursive; color: var(--purple); font-size: 1.5em; margin-bottom: 5px; }
+
+  .divider { height: 2px; background: linear-gradient(90deg, transparent, #e9d5ff, transparent); margin: 15px 0; }
+</style>
+</head>
+<body>
+
+<!-- Floating stars bg -->
+<div class="stars-bg" id="starsBg"></div>
+
+<div class="container">
+
+  <!-- HOME SCREEN -->
+  <div id="home" class="screen active">
+    <div class="game-header">
+      <button class="music-btn" onclick="toggleMusic()" id="musicToggle" title="Music On/Off" style="right:65px;">🎵</button>
+      <button class="music-btn" onclick="toggleSpeech()" id="speechToggle" title="Zara Ki Awaaz" style="right:18px;">🔊</button>
+      <h1>🎮 EduPlay Sindh</h1>
+      <p>Pre-Nursery se Class 5 tak — Seekho aur Khelo!</p>
+    </div>
+
+    <div class="mascot-wrap">
+      <span class="mascot-girl">👧</span>
+    </div>
+
+    <div class="speech-bubble" id="homeBubble">
+      Assalam o Alaikum! Main Zara hun 👋<br>Aaj kya seekhna hai? Chalein shuru karte hain! 🌟
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-box">
+        <div class="stat-val" id="totalStars">0</div>
+        <div class="stat-lbl">⭐ Stars</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="totalBadges">0</div>
+        <div class="stat-lbl">🏅 Badges</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="totalGames">0</div>
+        <div class="stat-lbl">🎮 Games</div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" style="font-size:1.1em; padding:14px 35px;" onclick="show('classSelect')">
+      🚀 Seekhna Shuru Karo!
+    </button>
+    <br>
+    <button class="btn" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:white;" onclick="resetProgress()">
+      🔄 Progress Reset Karo
+    </button>
+  </div>
+
+  <!-- CLASS SELECT -->
+  <div id="classSelect" class="screen">
+    <div class="game-header">
+      <button class="music-btn" onclick="toggleMusic()" id="musicToggle2">🎵</button>
+      <h1>📚 Class Chuniye</h1>
+    </div>
+    <div class="mascot-wrap" style="margin-top:15px;">
+      <span class="mascot-girl" style="font-size:3.5em;">👧</span>
+    </div>
+    <div class="speech-bubble">Apni class chuniye — main aapki madad karungi! 😊</div>
+    <div class="grid" id="classGrid"></div>
+    <button class="btn btn-back" onclick="show('home')">⬅ Wapas</button>
+  </div>
+
+  <!-- SUBJECT SELECT -->
+  <div id="subjectSelect" class="screen">
+    <div class="game-header">
+      <h1>📖 Subject Chuniye</h1>
+      <p id="subjectTitle2"></p>
+    </div>
+    <div class="mascot-wrap" style="margin-top:15px;">
+      <span class="mascot-girl" style="font-size:3.5em;">👧</span>
+    </div>
+    <div class="speech-bubble" id="subjectBubble">Kaunsa subject khelna hai? 🎯</div>
+    <div class="grid" id="subjectGrid"></div>
+    <button class="btn btn-back" onclick="show('classSelect')">⬅ Wapas</button>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="quiz" class="screen">
+    <div class="game-header">
+      <h1 id="quizTitle">Quiz! 🎯</h1>
+    </div>
+
+    <!-- Zara mini hint -->
+    <div style="display:flex; align-items:center; gap:10px; margin:12px 0 5px; justify-content:center;">
+      <span style="font-size:2.5em;">👧</span>
+      <div class="speech-bubble" id="zaraHint" style="margin:0; font-size:0.9em; text-align:left;max-width:300px;">
+        Dhyan se padho! Tum kar sakte ho! 💪
+      </div>
+    </div>
+
+    <div class="quiz-stats">
+      <div class="quiz-qnum" id="qNum">1/10</div>
+      <div class="quiz-score" id="qScore">⭐ 0</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="question-box" id="questionText">...</div>
+    <div id="optionsBox"></div>
+    <p id="feedback"></p>
+  </div>
+
+  <!-- RESULT SCREEN -->
+  <div id="result" class="screen">
+    <div class="game-header">
+      <h1 id="resultTitle">Shabaash! 🎉</h1>
+    </div>
+    <div class="mascot-wrap" style="margin-top:15px;">
+      <span class="mascot-girl" style="font-size:4em;" id="resultMascot">👧</span>
+    </div>
+    <div class="speech-bubble" id="resultBubble">Bohat acha kiya!</div>
+    <div class="result-box">
+      <div class="result-stars" id="resultStars">⭐⭐⭐</div>
+      <div id="resultScore">5/5</div>
+      <div id="badgeEarned"></div>
+    </div>
+    <button class="btn btn-primary" onclick="show('subjectSelect')">🔄 Dobara Khelo</button>
+    <button class="btn btn-subject" onclick="show('classSelect')">📚 Class Badlo</button>
+    <button class="btn btn-back" onclick="show('home')">🏠 Ghar Jao</button>
+  </div>
+
+</div><!-- end container -->
+
+<!-- SOUND EFFECTS using Web Audio API -->
+<script>
+// ===== MUSIC ENGINE (Web Audio API — always works, no external files needed) =====
+let AC = null;
+let musicTimer = null;
+let isMusicOn = false;
+let noteIdx = 0;
+
+// Happy kids tune — Do Re Mi style
+const TUNE = [
+  {f:523,d:0.3},{f:587,d:0.3},{f:659,d:0.3},{f:698,d:0.3},
+  {f:784,d:0.4},{f:784,d:0.2},{f:880,d:0.4},{f:784,d:0.5},
+  {f:698,d:0.3},{f:659,d:0.3},{f:587,d:0.3},{f:523,d:0.5},
+  {f:659,d:0.3},{f:523,d:0.3},{f:587,d:0.3},{f:659,d:0.4},
+  {f:523,d:0.6}
+];
+
+function getAC() {
+  if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+  return AC;
+}
+
+function playTone(freq, dur, vol=0.07, type='sine') {
+  try {
+    const ac = getAC();
+    if (ac.state === 'suspended') ac.resume();
+    const osc = ac.createOscillator();
+    const g   = ac.createGain();
+    osc.connect(g); g.connect(ac.destination);
+    osc.type = type;
+    osc.frequency.value = freq;
+    g.gain.setValueAtTime(vol, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + dur);
+    osc.start(ac.currentTime);
+    osc.stop(ac.currentTime + dur + 0.05);
+  } catch(e) {}
+}
+
+function scheduleNextNote() {
+  if (!isMusicOn) return;
+  const n = TUNE[noteIdx % TUNE.length];
+  playTone(n.f, n.d, 0.07);
+  noteIdx++;
+  musicTimer = setTimeout(scheduleNextNote, n.d * 1000 + 80);
+}
+
+function startMusic() {
+  if (musicTimer) return;
+  scheduleNextNote();
+}
+function stopMusic() {
+  clearTimeout(musicTimer);
+  musicTimer = null;
+}
+
+function toggleMusic() {
+  isMusicOn = !isMusicOn;
+  document.querySelectorAll('[id^=musicToggle]').forEach(el => {
+    el.textContent = isMusicOn ? '🎵' : '🔇';
+  });
+  if (isMusicOn) { getAC(); startMusic(); }
+  else stopMusic();
+}
+
+function playSFX(type) {
+  try {
+    const ac = getAC();
+    if (ac.state === 'suspended') ac.resume();
+    if (type === 'correct') {
+      // Rising happy tones
+      [[523,0],[659,0.12],[784,0.24],[1047,0.36]].forEach(([f,t]) => {
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.connect(g); g.connect(ac.destination);
+        o.type = 'sine'; o.frequency.value = f;
+        g.gain.setValueAtTime(0.18, ac.currentTime + t);
+        g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + t + 0.18);
+        o.start(ac.currentTime + t); o.stop(ac.currentTime + t + 0.22);
+      });
+    } else {
+      // Falling wrong tone
+      [[300,0],[220,0.15],[160,0.3]].forEach(([f,t]) => {
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.connect(g); g.connect(ac.destination);
+        o.type = 'sawtooth'; o.frequency.value = f;
+        g.gain.setValueAtTime(0.12, ac.currentTime + t);
+        g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + t + 0.18);
+        o.start(ac.currentTime + t); o.stop(ac.currentTime + t + 0.22);
+      });
+    }
+  } catch(e) {}
+}
+
+// ===== ZARA SPEECH — Urdu Pakistani Female =====
+let zaraVoice = null;
+let speechEnabled = true;
+
+function initVoice() {
+  function pickVoice() {
+    const voices = window.speechSynthesis.getVoices();
+    // 1st choice: Urdu voice (Pakistan/India)
+    zaraVoice = voices.find(v => v.lang === 'ur-PK')
+              || voices.find(v => v.lang === 'ur-IN')
+              || voices.find(v => v.lang.startsWith('ur'))
+              // 2nd choice: Hindi female (closest to Urdu sound)
+              || voices.find(v => v.lang === 'hi-IN' && v.name.toLowerCase().includes('female'))
+              || voices.find(v => v.lang === 'hi-IN')
+              // 3rd fallback: any female
+              || voices.find(v => v.name.toLowerCase().includes('female'))
+              || voices.find(v => v.name.includes('Zira') || v.name.includes('Heera') || v.name.includes('Lekha'))
+              || voices[0];
+    console.log('Zara voice:', zaraVoice ? zaraVoice.name + ' / ' + zaraVoice.lang : 'none');
+  }
+  pickVoice();
+  window.speechSynthesis.onvoiceschanged = pickVoice;
+}
+
+// Speak a single utterance — returns Promise so we can chain
+function speakOne(text, rate=0.82, pitch=1.3) {
+  return new Promise(resolve => {
+    if (!speechEnabled || !text.trim()) { resolve(); return; }
+    try {
+      // Clean emojis
+      const clean = text.replace(/[\u{1F000}-\u{1FFFF}]/gu,'')
+                        .replace(/[⭐🎉🏆💪🌟✨😊🤗🎯💙👧👋📚🌈🔢🔬📖🌍💻☪️🤲🏞️🌺🎨🔷🔤✍️🇵🇰]/g,'')
+                        .replace(/\n/g,' ').replace(/\s+/g,' ').trim();
+      if (!clean) { resolve(); return; }
+      const utt = new SpeechSynthesisUtterance(clean);
+      utt.voice  = zaraVoice;
+      utt.rate   = rate;
+      utt.pitch  = pitch;
+      utt.volume = 1;
+      // Use Urdu lang if Urdu voice found, else default
+      utt.lang   = zaraVoice && zaraVoice.lang.startsWith('ur') ? 'ur-PK'
+                 : zaraVoice && zaraVoice.lang.startsWith('hi') ? 'hi-IN' : 'ur-PK';
+      utt.onend  = () => resolve();
+      utt.onerror = () => resolve();
+      window.speechSynthesis.speak(utt);
+    } catch(e) { resolve(); }
+  });
+}
+
+// Speak question + options one by one (Zara padhti hai sab kuch)
+function zaraAskQuestion(questionText, options) {
+  if (!speechEnabled) return;
+  window.speechSynthesis.cancel();
+
+  // Remove emojis from question for cleaner urdu reading
+  const qClean = questionText.replace(/[\u{1F000}-\u{1FFFF}]/gu,'')
+                              .replace(/[^\w\s?.,:!÷×°%√\-\/+]/g,'')
+                              .trim();
+
+  // Chain: question → "option A" → option → "option B" ...
+  const letters = ['A','B','C','D'];
+  let chain = speakOne(qClean, 0.80, 1.25);
+  options.forEach((opt, i) => {
+    chain = chain.then(() => speakOne(`Option ${letters[i]}... ${opt}`, 0.85, 1.2));
+  });
+}
+
+function zaraSpeak(text) {
+  if (!speechEnabled) return;
+  window.speechSynthesis.cancel();
+  speakOne(text, 0.82, 1.3);
+}
+
+function toggleSpeech() {
+  speechEnabled = !speechEnabled;
+  document.getElementById('speechToggle').textContent = speechEnabled ? '🔊' : '🔈';
+  if (!speechEnabled) window.speechSynthesis.cancel();
+}
+
+window.addEventListener('load', initVoice);
+
+// ===== FLOATING STARS BACKGROUND =====
+function createStarsBg() {
+  const bg = document.getElementById('starsBg');
+  const emojis = ['⭐','🌟','✨','💫','🎈','🌸','🦋','🌈'];
+  for (let i = 0; i < 15; i++) {
+    const span = document.createElement('span');
+    span.className = 'star-particle';
+    span.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    span.style.left = Math.random() * 100 + '%';
+    span.style.top  = Math.random() * 100 + '%';
+    span.style.animationDelay = Math.random() * 4 + 's';
+    span.style.animationDuration = (4 + Math.random() * 4) + 's';
+    bg.appendChild(span);
+  }
+}
+createStarsBg();
+
+// ===== CONFETTI =====
+function launchConfetti() {
+  const colors = ['#ff4d8d','#7c3aed','#fbbf24','#22c55e','#38bdf8','#f472b6'];
+  for (let i = 0; i < 60; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-piece';
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.animationDelay = Math.random() * 1.5 + 's';
+    c.style.width = (8 + Math.random() * 8) + 'px';
+    c.style.height = (8 + Math.random() * 8) + 'px';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 4000);
+  }
+}
+
+// ===== ZARA DIALOGUES =====
+const zaraHomeMsgs = [
+  "Assalam o Alaikum! Main Zara hun 👋\nAaj kya seekhna hai? Chalein shuru karte hain! 🌟",
+  "Waah! Tum wapas aa gaye! 😄\nAaj bhi kuch naya seekhenge! 📚",
+  "Hello dost! 🤗 Kya tum tayar ho?\nSeetara bano — seekho aur jito! ⭐"
+];
+
+const zaraHints = {
+  Math: ["Hisaab mein dhyan lagao! 🔢 Slowly sochna!", "Ek dum sahi! Gina karein unglion se bhi! 👐"],
+  Science: ["Qudrat ko samjho! 🌿 Nature amazing hai!", "Science sochne waale log hote hain! 🔬"],
+  English: ["English mein sochna seekho! 🗣️ Practice makes perfect!", "Har lafz ko dhyan se dekho! 📖"],
+  "General Knowledge": ["Pakistan ki baatein yaad karo! 🇵🇰 Watan se pyaar!", "Duniya ke baare mein janno! 🌍"],
+  Computer: ["Computer ek smart machine hai! 💻 Seekhte jao!", "Technology future hai! 🚀 Tum bhi future ho!"],
+  Islamiat: ["Deen seekhna ibaadat hai! ☪️ Dhyan se padho!", "Allah ka shukar karo aur seekhte raho! 🤲"],
+  Sindhi: ["Sindh hamari mitti hai! 🏞️ Apni zuban pehchano!", "Sindhi culture bohot rich hai! Fakhr karo! 🌺"],
+  Colors: ["Rang duniya ko khubsoorat banate hain! 🎨", "Ardhay se zyada rang tum jaante ho! 🌈"],
+  Shapes: ["Shapes har jagah hain! 🔷 Ghar mein dhundo!", "Math ki buniyad hai shapes! 💡"],
+  Alphabets: ["A B C D... tum kar sakte ho! 🔤", "Har harf ek kahani hai! 📝"],
+  Numbers: ["1 2 3... girnaa shuru karo! 🔢", "Numbers ke saath dost bano! 💙"],
+  Urdu: ["Urdu hamari qaumi zuban hai! Izzat karo! 🇵🇰", "Urdu mein likho, padho, seekho! ✍️"],
+  DEFAULT: ["Dhyan se padho! Tum kar sakte ho! 💪", "Ghabrao mat — sochna shuru karo! 🤔", "Tum bohot smart ho! Jawab aajaayega! 😊"]
+};
+
+const zaraCorrect = [
+  "Shabaash! 🎉 Bilkul sahi jawab!",
+  "Waah! Tum ne kar diya! ⭐ Great job!",
+  "Zabardast! 🌟 Mujhe tum par fakhr hai!",
+  "Excellent! 🏆 Bahut acha!",
+  "Wah wah wah! 👏 Sahi hai bilkul!"
+];
+
+const zaraWrong = [
+  "Koi baat nahi! 😊 Agli baar better karenge!",
+  "Ghabrao mat! 💪 Galti se hi seekhte hain!",
+  "Try karte raho! 🌈 Tum kar sakte ho!",
+  "Almost sahi tha! 🤗 Aur practice karein!"
+];
+
+const zaraResult = {
+  perfect: ["PERFECT! 🏆 Tum champion ho!\nMain bahut khush hun!", "100% Sahi! 🌟 Tum super star ho!\nAaj bahut acha khela!"],
+  good:    ["Bohot acha kiya! ⭐ Kuch aur practice karein!\nTum improve ho rahe ho!"],
+  ok:      ["Theek hai! 💙 Koshish karte raho!\nPractice se perfect bante hain!"],
+  try:     ["Koi baat nahi! 🤗 Phir koshish karo!\nHim mat haaro — seekhte raho!"]
+};
+
+function getRandMsg(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function getZaraHint(subject) {
+  const msgs = zaraHints[subject] || zaraHints.DEFAULT;
+  return getRandMsg(msgs);
+}
+
+// ===== QUESTIONS DATABASE =====
+const QUESTIONS = {
+  "Pre-Nursery": {
+    "Colors": [
+      {q:"☀️ Suraj ka rang kya hai?", o:["Peela","Neela","Hara","Kala"], a:"Peela"},
+      {q:"🍎 Seb ka rang kya hai?", o:["Laal","Neela","Kala","Safaid"], a:"Laal"},
+      {q:"🌿 Pattay ka rang kya hai?", o:["Hara","Laal","Peela","Nila"], a:"Hara"},
+      {q:"🌊 Pani ka rang kya hai?", o:["Neela","Hara","Laal","Peela"], a:"Neela"},
+      {q:"☁️ Badal ka rang kya hai?", o:["Safaid","Kala","Hara","Laal"], a:"Safaid"},
+      {q:"🍌 Kela ka rang kya hai?", o:["Peela","Hara","Laal","Nila"], a:"Peela"},
+      {q:"🍆 Baigan ka rang kya hai?", o:["Baingni","Laal","Peela","Hara"], a:"Baingni"}
+    ],
+    "Shapes": [
+      {q:"⚽ Ball ki shape kya hai?", o:["Gol (Circle)","Chatukona","Tikon","Sitara"], a:"Gol (Circle)"},
+      {q:"📦 Dabba kis shape ka hota hai?", o:["Chatukona","Gol","Tikon","Dil"], a:"Chatukona"},
+      {q:"🍕 Pizza piece kis shape ki hai?", o:["Tikon (Triangle)","Gol","Chatukona","Sitara"], a:"Tikon (Triangle)"},
+      {q:"⭐ Yeh kya hai? ⭐", o:["Sitara (Star)","Gol","Chatukona","Dil"], a:"Sitara (Star)"}
+    ],
+    "Numbers": [
+      {q:"🍎🍎 Kitne seb hain?", o:["1","2","3","4"], a:"2"},
+      {q:"🌟🌟🌟 Kitne sitare hain?", o:["2","3","4","5"], a:"3"},
+      {q:"Pehla number kaun sa hai?", o:["1","0","2","3"], a:"1"},
+      {q:"🐱🐱🐱🐱 Kitni billiyaan hain?", o:["3","4","5","2"], a:"4"}
+    ]
+  },
+
+  "Nursery": {
+    "Alphabets": [
+      {q:"A se kya banta hai? 🍎", o:["Apple","Ball","Cat","Dog"], a:"Apple"},
+      {q:"B se kya banta hai? 🏀", o:["Apple","Ball","Cat","Egg"], a:"Ball"},
+      {q:"C se kya banta hai? 🐱", o:["Dog","Fish","Cat","Bird"], a:"Cat"},
+      {q:"D se kya banta hai? 🐶", o:["Egg","Dog","Ant","Cat"], a:"Dog"},
+      {q:"E se kya banta hai? 🥚", o:["Apple","Dog","Egg","Fish"], a:"Egg"},
+      {q:"F se kya banta hai? 🐟", o:["Fish","Goat","Hen","Ice"], a:"Fish"},
+      {q:"G se kya banta hai? 🐐", o:["Fish","Goat","Hat","Ice"], a:"Goat"},
+      {q:"M se kya banta hai? 🐒", o:["Nest","Monkey","Lion","Kite"], a:"Monkey"}
+    ],
+    "Numbers": [
+      {q:"🍎🍎🍎 Kitne seb hain?", o:["2","3","4","5"], a:"3"},
+      {q:"2 ke baad kaunsa number aata hai?", o:["1","4","3","5"], a:"3"},
+      {q:"1 + 1 = ?", o:["1","2","3","4"], a:"2"},
+      {q:"5 se pehle kaunsa number hai?", o:["6","4","3","7"], a:"4"},
+      {q:"🐔🐔🐔🐔🐔 Kitni murghiyan hain?", o:["4","6","5","3"], a:"5"}
+    ]
+  },
+
+  "KG": {
+    "English": [
+      {q:"C-A-T spell karo — yeh kya hai?", o:["Cat","Cap","Car","Can"], a:"Cat"},
+      {q:"D-O-G spell karo — yeh kya hai?", o:["Dig","Dug","Dog","Dot"], a:"Dog"},
+      {q:"'Big' ka ulta kya hai?", o:["Small","Tall","Fat","Old"], a:"Small"},
+      {q:"Aasman ka rang English mein?", o:["Green","Red","Blue","Yellow"], a:"Blue"},
+      {q:"Roz subah hum kya karte hain? (We ___ in the morning)", o:["Sleep","Wake up","Play","Cry"], a:"Wake up"},
+      {q:"Kitne din hain ek hafte mein?", o:["5","6","8","7"], a:"7"}
+    ],
+    "Math": [
+      {q:"2 + 2 = ?", o:["3","4","5","6"], a:"4"},
+      {q:"5 - 2 = ?", o:["2","4","3","1"], a:"3"},
+      {q:"3 + 4 = ?", o:["6","8","7","5"], a:"7"},
+      {q:"10 - 5 = ?", o:["4","5","6","7"], a:"5"},
+      {q:"1 + 9 = ?", o:["8","11","10","9"], a:"10"},
+      {q:"6 + 3 = ?", o:["8","9","10","7"], a:"9"}
+    ]
+  },
+
+  "Class 1": {
+    "Math": [
+      {q:"10 + 5 = ?", o:["12","15","20","10"], a:"15"},
+      {q:"20 - 8 = ?", o:["10","14","12","11"], a:"12"},
+      {q:"3 × 3 = ?", o:["6","9","12","8"], a:"9"},
+      {q:"Ek hafte mein kitne din hote hain?", o:["5","6","7","8"], a:"7"},
+      {q:"15 + 15 = ?", o:["25","30","35","20"], a:"30"},
+      {q:"50 - 20 = ?", o:["20","25","30","35"], a:"30"},
+      {q:"2 × 5 = ?", o:["8","12","10","6"], a:"10"},
+      {q:"Ek saal mein kitne mahine hote hain?", o:["10","11","12","13"], a:"12"}
+    ],
+    "English": [
+      {q:"A-P-P-L-E — yeh kya hai?", o:["Apple","Angle","Ample","Ankle"], a:"Apple"},
+      {q:"'Small' ka ulta kya hai?", o:["Tall","Big","Long","Wide"], a:"Big"},
+      {q:"Konsi cheez aasman mein hoti hai?", o:["Fish","Sun","Tree","Stone"], a:"Sun"},
+      {q:"'I ___ a student.' — Kaunsa word aata hai?", o:["am","is","are","be"], a:"am"},
+      {q:"Plural of 'cat' kya hai?", o:["Cats","Cates","Cating","Cated"], a:"Cats"},
+      {q:"'Sad' ka ulta kya hai?", o:["Angry","Tired","Happy","Sick"], a:"Happy"},
+      {q:"'Book' ki spelling?", o:["Bok","Book","Buk","Booc"], a:"Book"}
+    ],
+    "Urdu": [
+      {q:"الف سے کیا بنتا ہے؟", o:["انار","بکری","پانی","تالاب"], a:"انار"},
+      {q:"ب سے کیا بنتا ہے؟", o:["انار","بکری","پانی","درخت"], a:"بکری"},
+      {q:"پاکستان کی قومی زبان کیا ہے؟", o:["انگریزی","سندھی","اردو","پنجابی"], a:"اردو"},
+      {q:"آسمان کا رنگ کیا ہے؟", o:["سرخ","نیلا","سبز","پیلا"], a:"نیلا"},
+      {q:"'گائے' کیا دیتی ہے؟", o:["انڈہ","دودھ","اون","شہد"], a:"دودھ"},
+      {q:"سورج کہاں سے نکلتا ہے؟", o:["مغرب","شمال","مشرق","جنوب"], a:"مشرق"},
+      {q:"پ سے کیا بنتا ہے؟", o:["آم","پانی","کتاب","درخت"], a:"پانی"}
+    ],
+    "Science": [
+      {q:"Kaunsa janwar doodh deta hai? 🐄", o:["Sher","Gaay","Cheetah","Uqab"], a:"Gaay"},
+      {q:"Machhli kahan rehti hai? 🐟", o:["Zameen par","Pani mein","Asman mein","Darakhton par"], a:"Pani mein"},
+      {q:"Hamara closest star kaun sa hai?", o:["Polaris","Moon","Sun","Mars"], a:"Sun"},
+      {q:"Paani kab ubalta hai?", o:["50C","70C","100C","80C"], a:"100C"},
+      {q:"Kaun sa phal ped pe ugta hai?", o:["Aloo","Pyaz","Aam","Gajar"], a:"Aam"},
+      {q:"Hum kya sans lete hain?", o:["Carbon Dioxide","Nitrogen","Oxygen","Hydrogen"], a:"Oxygen"}
+    ],
+    "Computer": [
+      {q:"Computer ON/OFF karne ka button kya kehlaata hai?", o:["Mouse","Power Button","Keyboard","Monitor"], a:"Power Button"},
+      {q:"Likhai type karne ke liye kya use karte hain?", o:["Mouse","Speaker","Keyboard","Printer"], a:"Keyboard"},
+      {q:"Screen jo dikhata hai use kya kehte hain?", o:["CPU","Keyboard","Monitor","Mouse"], a:"Monitor"},
+      {q:"Computer mein data store hota hai — kahan?", o:["Monitor mein","CPU/Hard Drive mein","Mouse mein","Keyboard mein"], a:"CPU/Hard Drive mein"},
+      {q:"Internet use karne ke liye kya chahiye?", o:["Sirf Computer","Sirf Mobile","Computer + Connection","Sirf Wire"], a:"Computer + Connection"}
+    ]
+  },
+
+  "Class 2": {
+    "Math": [
+      {q:"5 x 4 = ?", o:["15","20","25","30"], a:"20"},
+      {q:"36 / 6 = ?", o:["5","7","6","8"], a:"6"},
+      {q:"100 - 45 = ?", o:["55","65","50","60"], a:"55"},
+      {q:"7 x 8 = ?", o:["54","63","56","48"], a:"56"},
+      {q:"40 + 35 = ?", o:["65","75","80","70"], a:"75"},
+      {q:"9 x 9 = ?", o:["72","81","90","63"], a:"81"},
+      {q:"120 / 4 = ?", o:["25","30","40","35"], a:"30"},
+      {q:"250 + 150 = ?", o:["350","400","450","300"], a:"400"}
+    ],
+    "English": [
+      {q:"Hot ka ulta kya hai?", o:["Warm","Cold","Cool","Wet"], a:"Cold"},
+      {q:"Up ka ulta kya hai?", o:["High","Over","Down","Under"], a:"Down"},
+      {q:"Happy ka ulta kya hai?", o:["Angry","Sad","Sick","Tired"], a:"Sad"},
+      {q:"Day ka ulta kya hai?", o:["Evening","Morning","Noon","Night"], a:"Night"},
+      {q:"Ek week mein kitne din hote hain?", o:["5","6","7","8"], a:"7"},
+      {q:"Pani English mein kya hai?", o:["Fire","Stone","Water","Air"], a:"Water"},
+      {q:"She ___ to school. (Sahi word)", o:["go","goes","gone","going"], a:"goes"},
+      {q:"Kitaab English mein kya hai?", o:["Bag","Pen","Book","Chair"], a:"Book"}
+    ],
+    "Urdu": [
+      {q:"ت سے کیا بنتا ہے؟", o:["تتلی","بکری","پانی","آم"], a:"تتلی"},
+      {q:"پاکستان کا پرچم کس رنگ کا ہے؟", o:["سرخ اور سفید","سبز اور سفید","نیلا اور سفید","پیلا اور سبز"], a:"سبز اور سفید"},
+      {q:"'کتاب' کا مطلب انگریزی میں؟", o:["Pen","Book","Chair","Table"], a:"Book"},
+      {q:"اردو میں 'پانی' کو انگریزی میں کیا کہتے ہیں؟", o:["Fire","Water","Air","Stone"], a:"Water"},
+      {q:"ہمارے ملک کا نام کیا ہے؟", o:["ہندوستان","بنگلہ دیش","پاکستان","ایران"], a:"پاکستان"},
+      {q:"'سورج' صبح کس طرف سے نکلتا ہے؟", o:["مغرب","مشرق","شمال","جنوب"], a:"مشرق"}
+    ],
+    "Computer": [
+      {q:"Computer ka 'dimaag' kya kehlaata hai?", o:["Monitor","Keyboard","CPU","Mouse"], a:"CPU"},
+      {q:"Mouse se kya karte hain?", o:["Type karna","Click aur point karna","Print karna","Save karna"], a:"Click aur point karna"},
+      {q:"Printer ka kaam kya hai?", o:["Type karna","Display dikhana","Kaagaz par print karna","Data save karna"], a:"Kaagaz par print karna"},
+      {q:"Keyboard par kitne letters hote hain?", o:["24","25","26","28"], a:"26"},
+      {q:"Computer band karne ko kya kehte hain?", o:["Restart","Shutdown","Sleep","Boot"], a:"Shutdown"},
+      {q:"Computer mein photo/file rakhne ki jagah?", o:["Monitor","Mouse","Hard Drive / Memory","Keyboard"], a:"Hard Drive / Memory"}
+    ],
+    "Science": [
+      {q:"Kaunsa planet Suraj ke sabse qareeb hai?", o:["Earth","Mars","Mercury","Venus"], a:"Mercury"},
+      {q:"Baraf pani ka kaunsa roop hai?", o:["Gas","Liquid","Solid","Plasma"], a:"Solid"},
+      {q:"Insaan ke kitne daant hote hain adult mein?", o:["28","30","32","36"], a:"32"},
+      {q:"Photosynthesis mein kya banta hai?", o:["Oxygen","CO2","Water","Nitrogen"], a:"Oxygen"}
+    ]
+  },
+
+  "Class 3": {
+    "Math": [
+      {q:"150 + 250 = ?", o:["350","400","450","380"], a:"400"},
+      {q:"12 x 12 = ?", o:["124","144","132","136"], a:"144"},
+      {q:"500 / 5 = ?", o:["50","100","25","75"], a:"100"},
+      {q:"1000 - 350 = ?", o:["600","700","650","550"], a:"650"},
+      {q:"45 x 2 = ?", o:["80","85","90","95"], a:"90"},
+      {q:"360 / 6 = ?", o:["50","60","70","80"], a:"60"},
+      {q:"999 + 1 = ?", o:["999","1000","1001","1100"], a:"1000"}
+    ],
+    "English": [
+      {q:"Fill blank: The boy ___ playing cricket.", o:["is","am","are","be"], a:"is"},
+      {q:"Plural of 'child'?", o:["Childs","Childen","Children","Childes"], a:"Children"},
+      {q:"Opposite of 'Open'?", o:["Wide","Close","Shut","Lock"], a:"Close"},
+      {q:"Which is a noun? (ism)", o:["Run","Happy","Book","Quickly"], a:"Book"},
+      {q:"My ___ is in the bag. (book ke liye)", o:["book","books","booking","booked"], a:"book"},
+      {q:"Sentence mein pehla harf kaisa hota hai?", o:["Small","Capital","Number","Symbol"], a:"Capital"},
+      {q:"'He runs fast.' — 'fast' is a?", o:["Noun","Verb","Adverb","Pronoun"], a:"Adverb"}
+    ],
+    "Urdu": [
+      {q:"'دوست' کا مطلب کیا ہے؟", o:["دشمن","دوست","بھائی","استاد"], a:"دوست"},
+      {q:"جملے میں بڑا حرف کہاں آتا ہے؟", o:["آخر میں","درمیان میں","شروع میں","کہیں نہیں"], a:"شروع میں"},
+      {q:"'استاد' کون ہوتے ہیں؟", o:["جو پڑھاتے ہیں","جو کھانا بناتے ہیں","جو گاتے ہیں","جو کھیلتے ہیں"], a:"جو پڑھاتے ہیں"},
+      {q:"پاکستان کا دارالحکومت کون سا ہے؟", o:["لاہور","کراچی","اسلام آباد","پشاور"], a:"اسلام آباد"},
+      {q:"'کھانا' کھانے سے پہلے کیا پڑھتے ہیں؟", o:["الحمد","بسم اللہ","سبحان اللہ","اللہ اکبر"], a:"بسم اللہ"},
+      {q:"'پھول' کا جمع کیا ہے؟", o:["پھولیں","پھولوں","پھول","پھولے"], a:"پھولوں"}
+    ],
+    "Computer": [
+      {q:"CPU ko kya kehte hain?", o:["Screen","Brain of Computer","Keyboard","Mouse"], a:"Brain of Computer"},
+      {q:"Mouse kisse kaam aata hai?", o:["Typing","Pointing and Clicking","Printing","Storage"], a:"Pointing and Clicking"},
+      {q:"Keyboard se kya karte hain?", o:["Dekhna","Type karna","Print karna","Save karna"], a:"Type karna"},
+      {q:"Computer ON karne ko kya kehte hain?", o:["Booting","Shutting","Sleeping","Typing"], a:"Booting"},
+      {q:"Monitor ka kaam kya hai?", o:["Sound dena","Display dikhana","Data store karna","Print karna"], a:"Display dikhana"},
+      {q:"Internet use karne wale document ko kya kehte hain?", o:["File","Webpage","Folder","Image"], a:"Webpage"},
+      {q:"MS Paint kisse kaam aata hai?", o:["Drawing aur coloring","Typing","Music sunna","Games khelna"], a:"Drawing aur coloring"}
+    ],
+    "General Knowledge": [
+      {q:"Pakistan ka qaumi phool kaun sa hai?", o:["Gulab","Motia Jasmine","Tulip","Lily"], a:"Motia Jasmine"},
+      {q:"Pakistan ka qaumi khel kaun sa hai?", o:["Cricket","Football","Hockey","Kabaddi"], a:"Hockey"},
+      {q:"Pakistan ki currency kya hai?", o:["Dollar","Rupee","Dirham","Riyal"], a:"Rupee"},
+      {q:"Islamabad kiska capital hai?", o:["Punjab","Sindh","Pakistan","KPK"], a:"Pakistan"},
+      {q:"Pakistan kab azaad hua?", o:["1946","1948","1947","1950"], a:"1947"},
+      {q:"Pakistan ka qaumi darakhta kaun sa hai?", o:["Deodar","Neem","Banyan","Sheesham"], a:"Deodar"},
+      {q:"Qaumi janwar Pakistan ka?", o:["Sher","Markhore","Hiran","Bhains"], a:"Markhore"}
+    ]
+  },
+
+  "Class 4": {
+    "Science": [
+      {q:"Hum sans lene mein kya lete hain?", o:["Oxygen","CO2","Nitrogen","Hydrogen"], a:"Oxygen"},
+      {q:"Earth ko rotate hone mein kitna waqt lagta hai?", o:["12 hours","24 hours","48 hours","36 hours"], a:"24 hours"},
+      {q:"Insaan ke body mein sabse badi bone?", o:["Spine","Femur (Thigh)","Skull","Arm"], a:"Femur (Thigh)"},
+      {q:"Photosynthesis mein plant kya use karta hai?", o:["Water only","Sunlight only","CO2 & Sunlight","Oxygen"], a:"CO2 & Sunlight"},
+      {q:"Konsa planet sab se bada hai?", o:["Earth","Saturn","Jupiter","Mars"], a:"Jupiter"},
+      {q:"Blood ka kya kaam hai?", o:["Food banana","Oxygen carry karna","Bones banana","Sight"], a:"Oxygen carry karna"}
+    ],
+    "Math": [
+      {q:"25 × 4 = ?", o:["75","100","125","150"], a:"100"},
+      {q:"1200 ÷ 4 = ?", o:["250","300","350","400"], a:"300"},
+      {q:"999 + 1 = ?", o:["1001","999","1000","1100"], a:"1000"},
+      {q:"75% = kitna fraction?", o:["3/5","2/3","3/4","4/5"], a:"3/4"},
+      {q:"2500 - 750 = ?", o:["1700","1750","1800","1650"], a:"1750"},
+      {q:"LCM of 4 and 6?", o:["8","10","12","24"], a:"12"}
+    ],
+    "General Knowledge": [
+      {q:"Dunya ka sabse bada darya kaun sa hai?", o:["Amazon","Nile","Yangtze","Mississippi"], a:"Nile"},
+      {q:"Quaid-e-Azam ka poora naam?", o:["Muhammad Iqbal","Muhammad Ali Jinnah","Liaquat Ali","Zulfikar Ali"], a:"Muhammad Ali Jinnah"},
+      {q:"Pakistan mein kitni provinces hain?", o:["3","4","5","6"], a:"4"}
+    ]
+  },
+
+  "Class 5": {
+    "Islamiat": [
+      {q:"Islam ke kitne arkaan (pillars) hain?", o:["3","4","5","6"], a:"5"},
+      {q:"Quran-e-Pak mein kitne Surahs hain?", o:["100","114","120","108"], a:"114"},
+      {q:"Pehle Nabi kaun the?", o:["Hazrat Ibrahim AS","Hazrat Nuh AS","Hazrat Adam AS","Hazrat Musa AS"], a:"Hazrat Adam AS"},
+      {q:"Namaz din mein kitni baar parhte hain?", o:["3","4","5","6"], a:"5"},
+      {q:"Ramzan ke baad kaunsa mahina aata hai?", o:["Muharram","Shawwal","Rajab","Safar"], a:"Shawwal"},
+      {q:"Zakat kab farz hoti hai?", o:["Jab chahein","Sabha par","Nisaab poora hone par","Roz"], a:"Nisaab poora hone par"}
+    ],
+    "Math": [
+      {q:"25% of 200 = ?", o:["25","50","75","100"], a:"50"},
+      {q:"Area of rectangle: 8cm × 5cm = ?", o:["30 cm²","35 cm²","40 cm²","45 cm²"], a:"40 cm²"},
+      {q:"√144 = ?", o:["10","12","14","16"], a:"12"},
+      {q:"3/4 + 1/4 = ?", o:["4/8","1","4/4","2"], a:"1"},
+      {q:"2³ = ?", o:["6","8","9","4"], a:"8"},
+      {q:"0.5 × 0.5 = ?", o:["1.0","0.25","0.50","2.5"], a:"0.25"},
+      {q:"60% of 500 = ?", o:["250","300","350","400"], a:"300"}
+    ],
+    "General Knowledge": [
+      {q:"Dunya ka sabse uncha pahad kaun sa hai?", o:["K2","Nanga Parbat","Mount Everest","Tirich Mir"], a:"Mount Everest"},
+      {q:"Internet ki ijad kisne ki?", o:["Bill Gates","Tim Berners-Lee","Steve Jobs","Elon Musk"], a:"Tim Berners-Lee"},
+      {q:"Pakistan ka sabse bada darya kaun sa hai?", o:["Ravi","Chenab","Indus (Darya-e-Sindh)","Jhelum"], a:"Indus (Darya-e-Sindh)"},
+      {q:"Dunya mein kitne mazhab hain (bade)?", o:["3","4","5","6"], a:"5"}
+    ],
+    "Science": [
+      {q:"Atom ka markaz kya kehlaata hai?", o:["Electron","Proton","Nucleus","Neutron"], a:"Nucleus"},
+      {q:"Sound travel karta hai through?", o:["Vacuum","Medium (hawa/pani)","Space","Light"], a:"Medium (hawa/pani)"},
+      {q:"Kaunsa vitamin dhoop se milta hai?", o:["Vitamin A","Vitamin B","Vitamin C","Vitamin D"], a:"Vitamin D"},
+      {q:"Insaan ka dil 1 minute mein kitni baar dhakta hai?", o:["50-60","60-100","100-120","40-50"], a:"60-100"}
+    ]
+  }
+};
+
+// ===== STATE & GAME LOGIC =====
+let state = JSON.parse(localStorage.getItem('eduplay_v2')) || { stars: 0, badges: 0, games: 0 };
+let cur = { idx: 0, score: 0, questions: [], class: '', subject: '' };
+
+function saveState() { localStorage.setItem('eduplay_v2', JSON.stringify(state)); }
+
+function resetProgress() {
+  if (confirm('Kya aap sach mein progress reset karna chahte hain?')) {
+    state = { stars: 0, badges: 0, games: 0 };
+    saveState();
+    updateHome();
+    alert('Progress reset ho gayi! ✅');
+  }
+}
+
+function updateHome() {
+  document.getElementById('totalStars').textContent = state.stars;
+  document.getElementById('totalBadges').textContent = state.badges;
+  document.getElementById('totalGames').textContent = state.games;
+  const msg = getRandMsg(zaraHomeMsgs);
+  document.getElementById('homeBubble').textContent = msg;
+  // Speak after short delay (let screen render first)
+  setTimeout(() => zaraSpeak(msg), 400);
+}
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'classSelect') buildClasses();
+  if (id === 'home') updateHome();
+}
+
+function buildClasses() {
+  const grid = document.getElementById('classGrid');
+  grid.innerHTML = '';
+  Object.keys(QUESTIONS).forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-class';
+    btn.innerHTML = `<span style="font-size:1.2em">${classEmoji(c)}</span><br>${c}`;
+    btn.style.height = '70px';
+    btn.onclick = () => { cur.class = c; buildSubjects(); show('subjectSelect'); };
+    grid.appendChild(btn);
+  });
+}
+
+function classEmoji(c) {
+  const map = { 'Pre-Nursery':'🌱','Nursery':'🌼','KG':'🌟','Class 1':'1️⃣','Class 2':'2️⃣','Class 3':'3️⃣','Class 4':'4️⃣','Class 5':'5️⃣' };
+  return map[c] || '📚';
+}
+
+function buildSubjects() {
+  document.getElementById('subjectTitle2').textContent = `📚 ${cur.class}`;
+  const grid = document.getElementById('subjectGrid');
+  grid.innerHTML = '';
+  Object.keys(QUESTIONS[cur.class]).forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-subject';
+    btn.innerHTML = `${subjectEmoji(s)}<br>${s}`;
+    btn.style.height = '65px';
+    btn.onclick = () => startQuiz(s);
+    grid.appendChild(btn);
+  });
+}
+
+function subjectEmoji(s) {
+  const map = { Math:'🔢', Science:'🔬', English:'📝', Urdu:'📖', Islamiat:'☪️', 'General Knowledge':'🌍', Computer:'💻', Colors:'🎨', Shapes:'🔷', Numbers:'🔢', Alphabets:'🔤', Sindhi:'🌺' };
+  return map[s] || '📚';
+}
+
+function startQuiz(sub) {
+  cur.subject = sub;
+  cur.questions = [...QUESTIONS[cur.class][sub]].sort(() => Math.random() - 0.5);
+  cur.idx = 0; cur.score = 0;
+  document.getElementById('quizTitle').textContent = `${subjectEmoji(sub)} ${sub}`;
+  show('quiz');
+  loadQuestion();
+}
+
+function loadQuestion() {
+  const q = cur.questions[cur.idx];
+  const total = cur.questions.length;
+  document.getElementById('qNum').textContent = `Q ${cur.idx + 1}/${total}`;
+  document.getElementById('qScore').textContent = `⭐ ${cur.score}`;
+  document.getElementById('progressFill').style.width = `${(cur.idx / total) * 100}%`;
+  document.getElementById('questionText').textContent = q.q;
+  document.getElementById('feedback').textContent = '';
+  const hint = getZaraHint(cur.subject);
+  document.getElementById('zaraHint').textContent = hint;
+
+  const box = document.getElementById('optionsBox');
+  box.innerHTML = '';
+  const shuffled = [...q.o].sort(() => Math.random() - 0.5);
+  shuffled.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-option';
+    btn.textContent = `${optEmoji(opt)} ${opt}`;
+    btn.onclick = () => checkAnswer(btn, opt, q.a, q.o);
+    box.appendChild(btn);
+  });
+
+  // Zara reads question + options after 400ms
+  setTimeout(() => zaraAskQuestion(q.q, shuffled), 400);
+}
+
+function optEmoji(opt) {
+  if (opt.match(/^\d/)) return '🔢';
+  return ['🅐','🅑','🅒','🅓'][Math.floor(Math.random()*4)];
+}
+
+function checkAnswer(btn, chosen, correct, allOptions) {
+  document.querySelectorAll('.btn-option').forEach(b => b.disabled = true);
+  const fb = document.getElementById('feedback');
+
+  if (chosen === correct) {
+    btn.classList.add('correct');
+    btn.textContent = '✅ ' + btn.textContent;
+    playSFX('correct');
+    cur.score++;
+    fb.style.color = '#22c55e';
+    const msg = getRandMsg(zaraCorrect);
+    fb.textContent = msg;
+    zaraSpeak(msg);
+  } else {
+    btn.classList.add('wrong');
+    btn.textContent = '❌ ' + btn.textContent;
+    playSFX('wrong');
+    // Show correct answer
+    document.querySelectorAll('.btn-option').forEach(b => {
+      if (b.textContent.includes(correct)) { b.classList.add('correct'); }
+    });
+    fb.style.color = '#ef4444';
+    const msg = getRandMsg(zaraWrong);
+    fb.textContent = msg;
+    zaraSpeak(msg);
+  }
+
+  setTimeout(() => {
+    cur.idx++;
+    if (cur.idx < cur.questions.length) loadQuestion();
+    else finish();
+  }, 1500);
+}
+
+function finish() {
+  const total = cur.questions.length;
+  const pct = cur.score / total;
+  state.stars += cur.score;
+  state.games++;
+
+  let badge = '';
+  if (pct === 1) { state.badges++; badge = `🏆 Perfect Score Badge mila!`; }
+  else if (pct >= 0.7) badge = `⭐ Acche jawab ke liye Star mila!`;
+
+  saveState();
+
+  // Stars display
+  const stars = pct === 1 ? '⭐⭐⭐' : pct >= 0.6 ? '⭐⭐' : '⭐';
+  document.getElementById('resultStars').textContent = stars;
+  document.getElementById('resultScore').textContent = `Score: ${cur.score}/${total}`;
+  document.getElementById('badgeEarned').innerHTML = badge ? `<div class="badge-earned">${badge}</div>` : '';
+
+  let msgArr, title, mascot;
+  if (pct === 1) {
+    title = '🏆 Perfect! Shukriya!';
+    mascot = '🎉👧🎉';
+    msgArr = zaraResult.perfect;
+    launchConfetti();
+  } else if (pct >= 0.7) {
+    title = '🌟 Shabaash!';
+    mascot = '👧😄';
+    msgArr = zaraResult.good;
+  } else if (pct >= 0.4) {
+    title = '💙 Theek Hai!';
+    mascot = '👧🤗';
+    msgArr = zaraResult.ok;
+  } else {
+    title = '💪 Koshish karo!';
+    mascot = '👧💪';
+    msgArr = zaraResult.try;
+  }
+
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultMascot').textContent = mascot;
+  const rm = getRandMsg(msgArr);
+  document.getElementById('resultBubble').textContent = rm;
+  setTimeout(() => zaraSpeak(rm), 600);
+
+  show('result');
+}
+
+// ===== INIT =====
+updateHome();
+
+// Auto-start music on first interaction (browser policy requires user gesture)
+document.addEventListener('click', function startOnce() {
+  if (!isMusicOn) {
+    isMusicOn = true;
+    document.querySelectorAll('[id^=musicToggle]').forEach(el => el.textContent = '🎵');
+    getAC();
+    startMusic();
+  }
+  document.removeEventListener('click', startOnce);
+}, { once: true });
+</script>
+</body>
+</html>
