@@ -6,6 +6,10 @@
     <title>🎮 Ultimate Kids Game Hub - 8 Games</title>
     <script src="three.min.js"></script>
     <script src="Tone.js"></script>
+    <script src="kids-games/batch1.js"></script>
+    <script src="kids-games/batch2.js"></script>
+    <script src="kids-games/batch3.js"></script>
+    <script src="kids-games/batch4.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         
@@ -243,9 +247,43 @@
             { id: 'snooker', name: '🎱 Snooker', category: 'board', desc: 'Pool game', icon: '🎱', type: '2d' },
             { id: 'patti', name: '🃏 Teen Patti', category: 'board', desc: 'Card game', icon: '🃏', type: '2d' },
             { id: 'snake', name: '🐍 Snake', category: 'arcade', desc: 'Classic snake', icon: '🐍', type: '2d' },
+            { id: 'tetris', name: '📦 Block Fall', category: 'puzzle', desc: 'Stack blocks', icon: '📦', type: '2d' },
+            { id: 'pacman', name: '👻 Maze Munch', category: 'arcade', desc: 'Eat dots', icon: '👻', type: '2d' },
+            { id: 'flappy', name: '🐦 Waqas Fly', category: 'arcade', desc: 'Fly through', icon: '🐦', type: '2d' },
+            { id: 'racing', name: '🏎️ Turbo Race', category: 'arcade', desc: 'Speed race', icon: '🏎️', type: '2d' },
+            { id: 'shooter', name: '🚀 Space Shooter', category: 'arcade', desc: 'Shoot aliens', icon: '🚀', type: '2d' },
+            { id: 'puzzle', name: '🧩 Jigsaw', category: 'puzzle', desc: 'Solve puzzles', icon: '🧩', type: '2d' },
+            { id: 'memory', name: '🧠 Memory Match', category: 'puzzle', desc: 'Match cards', icon: '🧠', type: '2d' },
+            { id: 'chess', name: '♟️ Chess', category: 'board', desc: "King's game", icon: '♟️', type: '2d' },
+            { id: 'checkers', name: '⚫ Checkers', category: 'board', desc: 'Jump & capture', icon: '⚫', type: '2d' },
+            { id: 'tictactoe', name: '⭕ Tic Tac Toe', category: 'board', desc: 'X vs O', icon: '⭕', type: '2d' },
+            { id: 'basketball', name: '🏀 Basketball', category: 'sports', desc: 'Shoot hoops', icon: '🏀', type: '2d' },
+            { id: 'tennis', name: '🎾 Tennis', category: 'sports', desc: 'Tennis match', icon: '🎾', type: '2d' },
+            { id: 'golf', name: '⛳ Golf', category: 'sports', desc: 'Hole in one', icon: '⛳', type: '2d' },
+            { id: 'bowling', name: '🎳 Bowling', category: 'sports', desc: 'Strike!', icon: '🎳', type: '2d' },
+            { id: 'fishing', name: '🎣 Fishing', category: 'arcade', desc: 'Catch fish', icon: '🎣', type: '2d' },
+            { id: 'cooking', name: '🍳 Cooking', category: 'arcade', desc: 'Chef game', icon: '🍳', type: '2d' },
+            { id: 'dressup', name: '👗 Dress Up', category: 'arcade', desc: 'Fashion game', icon: '👗', type: '2d' },
+            { id: 'painting', name: '🎨 Painting', category: 'arcade', desc: 'Draw & paint', icon: '🎨', type: '2d' },
+            { id: 'piano', name: '🎹 Piano', category: 'arcade', desc: 'Play music', icon: '🎹', type: '2d' },
+            { id: 'drums', name: '🥁 Drums', category: 'arcade', desc: 'Beat maker', icon: '🥁', type: '2d' },
+            { id: 'balloon', name: '🎈 Balloon Pop', category: 'arcade', desc: 'Pop balloons', icon: '🎈', type: '2d' },
+            { id: 'candy', name: '🍬 Candy Match', category: 'puzzle', desc: 'Match 3', icon: '🍬', type: '2d' },
+            { id: 'fruit', name: '🍉 Fruit Slice', category: 'arcade', desc: 'Slice fruits', icon: '🍉', type: '2d' },
+            { id: 'angry', name: '😠 Bird Launch', category: 'puzzle', desc: 'Launch birds', icon: '😠', type: '2d' },
+            { id: 'subway', name: '🚇 Metro Run', category: 'arcade', desc: 'Endless run', icon: '🚇', type: '2d' },
+            { id: 'temple', name: '🏃 Temple Dash', category: 'arcade', desc: 'Run fast', icon: '🏃', type: '2d' },
+            { id: 'minecraft', name: '⛏️ Block Builder', category: 'arcade', desc: 'Build tower', icon: '⛏️', type: '2d' },
+            { id: 'among', name: '👾 Imposter Hunt', category: 'arcade', desc: 'Find impostor', icon: '👾', type: '2d' },
+            { id: 'fortnite', name: '🔫 Battle Arena', category: 'arcade', desc: 'Survive', icon: '🔫', type: '2d' },
+            { id: 'roblox', name: '🎮 Waqas Obby', category: 'arcade', desc: 'Obstacle course', icon: '🎮', type: '2d' },
+            { id: 'mario', name: '🍄 Waqas Jump', category: 'arcade', desc: 'Jump & run', icon: '🍄', type: '2d' },
+            { id: 'sonic', name: '💙 Speed Dash', category: 'arcade', desc: 'Speed run', icon: '💙', type: '2d' },
         ];
 
         let currentGame = null;
+        let gameGen = 0;
+        let activeRenderer = null;
         let musicEnabled = true;
         let soundEnabled = true;
         let synth, membrane, metal;
@@ -331,6 +369,7 @@
         }
 
         function openGame(game) {
+            gameGen++;
             playSound('click');
             currentGame = game;
             document.getElementById('gameTitle').textContent = game.name;
@@ -342,8 +381,15 @@
         }
 
         function closeGame() {
+            gameGen++;
+            const __c = document.getElementById('gameContainer');
+            try { if (__c._cleanup) { __c._cleanup(); __c._cleanup = null; } } catch (e) {}
+            if (activeRenderer) {
+                try { activeRenderer.dispose(); if (activeRenderer.forceContextLoss) activeRenderer.forceContextLoss(); } catch (e) {}
+                activeRenderer = null;
+            }
             document.getElementById('gameOverlay').classList.remove('active');
-            document.getElementById('gameContainer').innerHTML = '';
+            __c.innerHTML = '';
             currentGame = null;
         }
 
@@ -359,37 +405,37 @@
                 case 'snooker': loadSnooker(container); break;
                 case 'patti': loadPatti(container); break;
                 case 'snake': loadSnake(container); break;
-                case 'tetris': loadTetris(container); break;
-                case 'pacman': loadPacman(container); break;                case 'flappy': loadFlappy(container); break;
-                case 'racing': loadRacing3D(container); break;
-                case 'shooter': loadShooter3D(container); break;
-                case 'puzzle': loadPuzzle(container); break;
+                case 'tetris': loadBlockfall(container); break;
+                case 'pacman': loadMaze(container); break;                case 'flappy': loadFly(container); break;
+                case 'racing': loadTurboRace(container); break;
+                case 'shooter': loadShooter(container); break;
+                case 'puzzle': loadJigsaw(container); break;
                 case 'memory': loadMemory(container); break;
                 case 'chess': loadChess(container); break;
                 case 'checkers': loadCheckers(container); break;
                 case 'tictactoe': loadTicTacToe(container); break;
-                case 'basketball': loadBasketball3D(container); break;
+                case 'basketball': loadBasket(container); break;
                 case 'tennis': loadTennis(container); break;
                 case 'golf': loadGolf(container); break;
-                case 'bowling': loadBowling3D(container); break;
+                case 'bowling': loadBowling(container); break;
                 case 'fishing': loadFishing(container); break;
                 case 'cooking': loadCooking(container); break;
-                case 'dressup': loadDressUp(container); break;
-                case 'painting': loadPainting(container); break;
+                case 'dressup': loadDressup(container); break;
+                case 'painting': loadPaint(container); break;
                 case 'piano': loadPiano(container); break;
                 case 'drums': loadDrums(container); break;
                 case 'balloon': loadBalloon(container); break;
                 case 'candy': loadCandy(container); break;
-                case 'fruit': loadFruitNinja(container); break;
-                case 'angry': loadAngryBirds(container); break;
-                case 'subway': loadSubway3D(container); break;
-                case 'temple': loadTempleRun3D(container); break;
-                case 'minecraft': loadMinecraft3D(container); break;
-                case 'among': loadAmongUs(container); break;
-                case 'fortnite': loadFortnite3D(container); break;
-                case 'roblox': loadRoblox3D(container); break;
-                case 'mario': loadMario(container); break;
-                case 'sonic': loadSonic(container); break;
+                case 'fruit': loadFruit(container); break;
+                case 'angry': loadBird(container); break;
+                case 'subway': loadMetro(container); break;
+                case 'temple': loadTemple(container); break;
+                case 'minecraft': loadBlocks(container); break;
+                case 'among': loadImposter(container); break;
+                case 'fortnite': loadArena(container); break;
+                case 'roblox': loadObby(container); break;
+                case 'mario': loadJump(container); break;
+                case 'sonic': loadSpeed(container); break;
                 default: container.innerHTML = '<div style="color:white;display:flex;align-items:center;justify-content:center;height:100%;font-size:2rem;"> Game Coming Soon! </div>';
             }
         }
@@ -408,6 +454,7 @@
             
             const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
             const renderer = new THREE.WebGLRenderer({ canvas });
+            activeRenderer = renderer;
             renderer.setSize(container.clientWidth, container.clientHeight);
             renderer.shadowMap.enabled = true;
             
@@ -526,6 +573,7 @@
             
             const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
             const renderer = new THREE.WebGLRenderer({ canvas });
+            activeRenderer = renderer;
             renderer.setSize(container.clientWidth, container.clientHeight);
             
             // Field
@@ -591,6 +639,7 @@
         }
 
         function loadHockey(container) {
+            const __gen = gameGen;
             container.innerHTML = '<canvas style="width:100%;height:100%;background:linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);"></canvas>';
             const canvas = container.querySelector('canvas');
             const ctx = canvas.getContext('2d');
@@ -696,7 +745,7 @@
                 ctx.fill();
                 
                 update();
-                requestAnimationFrame(draw);
+                if (__gen === gameGen) requestAnimationFrame(draw);
             }
             draw();
         }
@@ -729,6 +778,7 @@
         }
 
         function loadCarrom(container) {
+            const __gen = gameGen;
             container.innerHTML = `
                 <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg, #8B4513 0%, #D2691E 100%);">
                     <canvas id="carromCanvas" style="background:#DEB887;border:10px solid #8B4513;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,0.5);"></canvas>
@@ -832,12 +882,13 @@
                 ctx.fill();
                 
                 update();
-                requestAnimationFrame(draw);
+                if (__gen === gameGen) requestAnimationFrame(draw);
             }
             draw();
         }
 
         function loadSnooker(container) {
+            const __gen = gameGen;
             container.innerHTML = `
                 <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#1a472a;">
                     <canvas id="snookerCanvas" style="background:#0d5c3b;border:15px solid #654321;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,0.5);"></canvas>
@@ -956,7 +1007,7 @@
                     ctx.stroke();
                 }
                 
-                update();                requestAnimationFrame(draw);
+                update();                if (__gen === gameGen) requestAnimationFrame(draw);
             }
             draw();
         }
@@ -980,6 +1031,7 @@
         }
 
         function loadSnake(container) {
+            const __gen = gameGen;
             container.innerHTML = '<canvas style="width:100%;height:100%;background:#000;"></canvas>';
             const canvas = container.querySelector('canvas');
             const ctx = canvas.getContext('2d');
@@ -996,12 +1048,14 @@
             let score = 0;
             const gridSize = 20;
             
-            document.addEventListener('keydown', (e) => {
+            const __snakeKey = (e) => {
                 if (e.key === 'ArrowUp' && dy === 0) { dx = 0; dy = -1; }
                 if (e.key === 'ArrowDown' && dy === 0) { dx = 0; dy = 1; }
                 if (e.key === 'ArrowLeft' && dx === 0) { dx = -1; dy = 0; }
                 if (e.key === 'ArrowRight' && dx === 0) { dx = 1; dy = 0; }
-            });
+            };
+            document.addEventListener('keydown', __snakeKey);
+            container._cleanup = () => { document.removeEventListener('keydown', __snakeKey); };
             
             function update() {
                 if (!currentGame) return;
@@ -1032,43 +1086,12 @@
                 ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize-2, gridSize-2);
                 
                 update();
-                setTimeout(() => requestAnimationFrame(draw), 100);
+                setTimeout(() => { if (__gen === gameGen) requestAnimationFrame(draw); }, 100);
             }
             draw();
         }
 
         // Placeholder functions for remaining games
-        function loadTetris(container) { createPlaceholder(container, '📦 Tetris'); }
-        function loadPacman(container) { createPlaceholder(container, '👻 Pac-Man'); }
-        function loadFlappy(container) { createPlaceholder(container, '🐦 Flappy Bird'); }
-        function loadRacing3D(container) { createPlaceholder(container, '🏎️ Car Racing 3D'); }
-        function loadShooter3D(container) { createPlaceholder(container, '🚀 Space Shooter 3D'); }
-        function loadPuzzle(container) { createPlaceholder(container, '🧩 Jigsaw Puzzle'); }
-        function loadMemory(container) { createPlaceholder(container, '🧠 Memory Game'); }
-        function loadChess(container) { createPlaceholder(container, '♟️ Chess'); }
-        function loadCheckers(container) { createPlaceholder(container, '⚫ Checkers'); }
-        function loadTicTacToe(container) { createPlaceholder(container, '⭕ Tic Tac Toe'); }
-        function loadBasketball3D(container) { createPlaceholder(container, '🏀 Basketball 3D'); }
-        function loadTennis(container) { createPlaceholder(container, '🎾 Tennis'); }
-        function loadGolf(container) { createPlaceholder(container, '⛳ Golf'); }
-        function loadBowling3D(container) { createPlaceholder(container, '🎳 Bowling 3D'); }
-        function loadFishing(container) { createPlaceholder(container, '🎣 Fishing'); }
-        function loadCooking(container) { createPlaceholder(container, '🍳 Cooking'); }
-        function loadDressUp(container) { createPlaceholder(container, '👗 Dress Up'); }        function loadPainting(container) { createPlaceholder(container, '🎨 Painting'); }
-        function loadPiano(container) { createPlaceholder(container, '🎹 Piano'); }
-        function loadDrums(container) { createPlaceholder(container, '🥁 Drums'); }
-        function loadBalloon(container) { createPlaceholder(container, '🎈 Balloon Pop'); }
-        function loadCandy(container) { createPlaceholder(container, '🍬 Candy Crush'); }
-        function loadFruitNinja(container) { createPlaceholder(container, '🍉 Fruit Ninja'); }
-        function loadAngryBirds(container) { createPlaceholder(container, '😠 Angry Birds'); }
-        function loadSubway3D(container) { createPlaceholder(container, '🚇 Subway Surfers 3D'); }
-        function loadTempleRun3D(container) { createPlaceholder(container, '🏃 Temple Run 3D'); }
-        function loadMinecraft3D(container) { createPlaceholder(container, '⛏️ Minecraft 3D'); }
-        function loadAmongUs(container) { createPlaceholder(container, '👾 Among Us'); }
-        function loadFortnite3D(container) { createPlaceholder(container, '🔫 Fortnite 3D'); }
-        function loadRoblox3D(container) { createPlaceholder(container, '🎮 Roblox 3D'); }
-        function loadMario(container) { createPlaceholder(container, '🍄 Mario'); }
-        function loadSonic(container) { createPlaceholder(container, '💙 Sonic'); }
 
         function createPlaceholder(container, name) {
             container.innerHTML = `
