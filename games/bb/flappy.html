@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+<title>🐤 Flappy — BrainBlast</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#05070c;color:#e2e8f0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+#top{width:min(94vw,400px);display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.back{color:#63b3ed;text-decoration:none;font-weight:700;font-size:14px}
+#hud{display:flex;gap:8px}
+.pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:6px 12px;border-radius:999px;font-size:14px;font-weight:700}
+canvas{width:min(94vw,400px);height:auto;border-radius:16px;border:2px solid rgba(99,179,237,.25);background:#0a0e1a;touch-action:none;display:block}
+.overlay{position:fixed;inset:0;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;background:rgba(5,7,12,.88);z-index:10;text-align:center;padding:20px}
+.overlay h1{font-size:30px}
+.overlay p{color:#94a3b8;font-size:14px;line-height:1.7;max-width:330px}
+.overlay .sc{font-size:20px;color:#fff;font-weight:800}
+.btn{background:linear-gradient(135deg,#63b3ed,#2563eb);border:none;color:#fff;font-weight:800;font-size:16px;padding:12px 38px;border-radius:999px;cursor:pointer}
+.hidden{display:none!important}
+#hint{color:#5b6b8c;font-size:12px;margin-top:10px}
+</style>
+</head>
+<body>
+<div id="top">
+  <a class="back" href="../brainblast.html">← BrainBlast</a>
+  <div id="hud"><span class="pill">⭐ <span id="score">0</span></span><span class="pill">🏆 <span id="best">0</span></span></div>
+</div>
+<canvas id="game" width="400" height="560"></canvas>
+<div id="hint">👆 Tap / click / Space to flap</div>
+
+<div class="overlay" id="startOv">
+  <h1>🐤</h1><h1>Flappy</h1>
+  <p>Tap to flap your wings and fly through the gaps. One hit and it's over — how far can you get?</p>
+  <button class="btn" id="startBtn">▶ Play</button>
+</div>
+<div class="overlay hidden" id="overOv">
+  <h1>💥</h1><h1>Game Over</h1>
+  <p class="sc">Score: <span id="final">0</span></p>
+  <p class="sc" style="font-size:15px;color:#94a3b8">Best: <span id="finalBest">0</span> <span id="newBest" style="color:#4ade80"></span></p>
+  <button class="btn" id="retryBtn">↻ Play again</button>
+</div>
+
+<script>
+const cv=document.getElementById('game'),ctx=cv.getContext('2d');
+const W=400,H=560,KEY='bb_best_flappy';
+let bird,pipes,score,best=+localStorage.getItem(KEY)||0,raf=null,running=false,frame=0;
+document.getElementById('best').textContent=best;
+
+function reset(){
+  bird={x:110,y:H/2,vy:0,r:14,rot:0};
+  pipes=[];score=0;frame=0;updateHud();
+}
+function updateHud(){
+  document.getElementById('score').textContent=score;
+  document.getElementById('best').textContent=best;
+}
+function flap(){ if(running) bird.vy=-7.2; }
+function loop(){
+  if(!running)return;
+  frame++;
+  bird.vy=Math.min(bird.vy+0.45,12);
+  bird.y+=bird.vy;
+  bird.rot=Math.max(-0.4,Math.min(1.2,bird.vy*0.12));
+  if(frame%95===0){
+    const gap=150,gapY=80+Math.random()*(H-160-gap);
+    pipes.push({x:W,w:64,gapY,gap,passed:false});
+  }
+  for(const p of pipes){
+    p.x-=2.6;
+    if(!p.passed&&p.x+p.w<bird.x-bird.r){
+      p.passed=true;score++;
+      if(score>best){best=score;localStorage.setItem(KEY,best);document.getElementById('newBest').textContent='🎉 NEW!';}
+      updateHud();
+    }
+    // collision
+    if(bird.x+bird.r>p.x&&bird.x-bird.r<p.x+p.w){
+      if(bird.y-bird.r<p.gapY||bird.y+bird.r>p.gapY+p.gap){die();return;}
+    }
+  }
+  pipes=pipes.filter(p=>p.x+p.w>-20);
+  if(bird.y+bird.r>=H-8||bird.y-bird.r<0){die();return;}
+  draw();raf=requestAnimationFrame(loop);
+}
+function draw(){
+  // sky
+  const sky=ctx.createLinearGradient(0,0,0,H);
+  sky.addColorStop(0,'#0b1526');sky.addColorStop(1,'#0a0e1a');
+  ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+  // stars
+  ctx.fillStyle='rgba(255,255,255,.35)';
+  for(let i=0;i<30;i++){const sx=(i*97)%W,sy=(i*61)%H;ctx.fillRect(sx,sy,2,2);}
+  // pipes
+  for(const p of pipes){
+    const g=ctx.createLinearGradient(p.x,0,p.x+p.w,0);
+    g.addColorStop(0,'#16a34a');g.addColorStop(.5,'#4ade80');g.addColorStop(1,'#16a34a');
+    ctx.fillStyle=g;
+    ctx.beginPath();ctx.roundRect(p.x,-4,p.w,p.gapY+4,8);ctx.fill();
+    ctx.beginPath();ctx.roundRect(p.x,p.gapY+p.gap,p.w,H-(p.gapY+p.gap)+4,8);ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,.25)';ctx.fillRect(p.x+6,0,5,p.gapY);ctx.fillRect(p.x+6,p.gapY+p.gap,5,H);
+  }
+  // ground
+  ctx.fillStyle='#111c33';ctx.fillRect(0,H-8,W,8);
+  // bird
+  ctx.save();ctx.translate(bird.x,bird.y);ctx.rotate(bird.rot);
+  ctx.font='30px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('🐤',0,0);ctx.restore();
+}
+function die(){
+  running=false;cancelAnimationFrame(raf);
+  document.getElementById('final').textContent=score;
+  document.getElementById('finalBest').textContent=best;
+  if(document.getElementById('newBest').textContent==='')document.getElementById('newBest').textContent='';
+  document.getElementById('overOv').classList.remove('hidden');
+}
+function start(){
+  document.getElementById('startOv').classList.add('hidden');
+  document.getElementById('overOv').classList.add('hidden');
+  document.getElementById('newBest').textContent='';
+  reset();running=true;loop();
+}
+document.getElementById('startBtn').onclick=start;
+document.getElementById('retryBtn').onclick=start;
+document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();flap();}});
+cv.addEventListener('pointerdown',flap);
+cv.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+reset();draw();
+</script>
+</body>
+</html>

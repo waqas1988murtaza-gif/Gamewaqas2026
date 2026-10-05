@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+<title>🃏 Memory Match — BrainBlast</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#05070c;color:#e2e8f0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;user-select:none;-webkit-user-select:none;padding:12px}
+#top{width:min(94vw,400px);display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.back{color:#63b3ed;text-decoration:none;font-weight:700;font-size:14px}
+#hud{display:flex;gap:8px}
+.pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:6px 12px;border-radius:999px;font-size:14px;font-weight:700}
+#board{width:min(94vw,400px);display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.card{aspect-ratio:1;border-radius:14px;background:linear-gradient(135deg,#101626,#0a0e1a);border:2px solid rgba(99,179,237,.25);display:flex;align-items:center;justify-content:center;font-size:38px;cursor:pointer;transition:transform .15s,border-color .2s;touch-action:manipulation}
+.card:active{transform:scale(.93)}
+.card.open{background:linear-gradient(135deg,#1b2a4a,#101a33);border-color:#22d3ee}
+.card.done{background:linear-gradient(135deg,#14532d,#0d3b1e);border-color:#4ade80;cursor:default}
+.card .q{color:#3b4a6b;font-size:34px}
+.overlay{position:fixed;inset:0;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;background:rgba(5,7,12,.88);z-index:10;text-align:center;padding:20px}
+.overlay h1{font-size:30px}
+.overlay p{color:#94a3b8;font-size:14px;line-height:1.7;max-width:330px}
+.overlay .sc{font-size:19px;color:#fff;font-weight:800}
+.btn{background:linear-gradient(135deg,#63b3ed,#2563eb);border:none;color:#fff;font-weight:800;font-size:16px;padding:12px 38px;border-radius:999px;cursor:pointer}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="top">
+  <a class="back" href="../brainblast.html">← BrainBlast</a>
+  <div id="hud"><span class="pill">👆 <span id="moves">0</span></span><span class="pill">⏱️ <span id="time">0s</span></span><span class="pill">🏆 <span id="best">–</span></span></div>
+</div>
+<div id="board"></div>
+
+<div class="overlay" id="startOv">
+  <h1>🃏</h1><h1>Memory Match</h1>
+  <p>Flip the cards and find all 8 pairs. Finish in as few moves as you can — your best stays saved!</p>
+  <button class="btn" id="startBtn">▶ Play</button>
+</div>
+<div class="overlay hidden" id="overOv">
+  <h1>🎉</h1><h1>All pairs found!</h1>
+  <p class="sc"><span id="finalMoves">0</span> moves · <span id="finalTime">0s</span></p>
+  <p class="sc" style="font-size:15px;color:#94a3b8">Best: <span id="finalBest">–</span> moves <span id="newBest" style="color:#4ade80"></span></p>
+  <button class="btn" id="retryBtn">↻ Play again</button>
+</div>
+
+<script>
+const EMOJI=['🚀','🎮','⚽','🍕','🐬','🌙','🎸','🐝'];
+const KEY='bb_best_memory';
+const board=document.getElementById('board');
+let deck,first,lock,moves,matched,timerInt,secs,started;
+let best=+localStorage.getItem(KEY)||0;
+if(best)document.getElementById('best').textContent=best;
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+function reset(){
+  deck=shuffle([...EMOJI,...EMOJI]);
+  first=null;lock=false;moves=0;matched=0;secs=0;started=false;
+  clearInterval(timerInt);
+  document.getElementById('moves').textContent='0';
+  document.getElementById('time').textContent='0s';
+  board.innerHTML='';
+  deck.forEach((e,i)=>{
+    const d=document.createElement('div');
+    d.className='card';d.dataset.i=i;
+    d.innerHTML='<span class="q">?</span>';
+    d.onclick=()=>flip(d,e);
+    board.appendChild(d);
+  });
+}
+function flip(d,e){
+  if(lock||d.classList.contains('open')||d.classList.contains('done'))return;
+  if(!started){started=true;timerInt=setInterval(()=>{secs++;document.getElementById('time').textContent=secs+'s';},1000);}
+  d.classList.add('open');d.innerHTML=`<span>${e}</span>`;
+  if(!first){first={d,e};return;}
+  moves++;document.getElementById('moves').textContent=moves;
+  if(first.e===e){
+    first.d.classList.add('done');d.classList.add('done');first=null;matched++;
+    if(matched===8)win();
+  }else{
+    lock=true;const a=first.d,b=d;first=null;
+    setTimeout(()=>{a.classList.remove('open');a.innerHTML='<span class="q">?</span>';
+      b.classList.remove('open');b.innerHTML='<span class="q">?</span>';lock=false;},650);
+  }
+}
+function win(){
+  clearInterval(timerInt);
+  document.getElementById('finalMoves').textContent=moves;
+  document.getElementById('finalTime').textContent=secs+'s';
+  if(!best||moves<best){best=moves;localStorage.setItem(KEY,best);document.getElementById('newBest').textContent='🎉 NEW!';}
+  else document.getElementById('newBest').textContent='';
+  document.getElementById('finalBest').textContent=best;
+  document.getElementById('best').textContent=best;
+  setTimeout(()=>document.getElementById('overOv').classList.remove('hidden'),500);
+}
+function start(){
+  document.getElementById('startOv').classList.add('hidden');
+  document.getElementById('overOv').classList.add('hidden');
+  reset();
+}
+document.getElementById('startBtn').onclick=start;
+document.getElementById('retryBtn').onclick=start;
+reset();
+</script>
+</body>
+</html>

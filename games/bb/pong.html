@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+<title>🏓 Pong — BrainBlast</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#05070c;color:#e2e8f0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+#top{width:min(96vw,560px);display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.back{color:#63b3ed;text-decoration:none;font-weight:700;font-size:14px}
+#hud{display:flex;gap:8px}
+.pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:6px 12px;border-radius:999px;font-size:14px;font-weight:700}
+canvas{width:min(96vw,560px);height:auto;border-radius:16px;border:2px solid rgba(99,179,237,.25);background:#0a0e1a;touch-action:none;display:block}
+.overlay{position:fixed;inset:0;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;background:rgba(5,7,12,.88);z-index:10;text-align:center;padding:20px}
+.overlay h1{font-size:30px}
+.overlay p{color:#94a3b8;font-size:14px;line-height:1.7;max-width:330px}
+.overlay .sc{font-size:20px;color:#fff;font-weight:800}
+.btn{background:linear-gradient(135deg,#63b3ed,#2563eb);border:none;color:#fff;font-weight:800;font-size:16px;padding:12px 38px;border-radius:999px;cursor:pointer}
+.hidden{display:none!important}
+#hint{color:#5b6b8c;font-size:12px;margin-top:10px}
+</style>
+</head>
+<body>
+<div id="top">
+  <a class="back" href="../brainblast.html">← BrainBlast</a>
+  <div id="hud"><span class="pill">🔵 You <span id="ps">0</span> : <span id="cs">0</span> 🤖</span><span class="pill">🏆 Wins <span id="wins">0</span></span></div>
+</div>
+<canvas id="game" width="560" height="400"></canvas>
+<div id="hint">🖱️ Move mouse / drag finger &nbsp;·&nbsp; ⌨️ ↑ ↓ &nbsp;·&nbsp; First to 5 wins</div>
+
+<div class="overlay" id="startOv">
+  <h1>🏓</h1><h1>Pong vs CPU</h1>
+  <p>The timeless classic. Move your paddle, outsmart the computer. First to 5 points takes the match!</p>
+  <button class="btn" id="startBtn">▶ Play</button>
+</div>
+<div class="overlay hidden" id="overOv">
+  <h1 id="overEmoji">🏆</h1><h1 id="overTitle">You win!</h1>
+  <p class="sc"><span id="fp">5</span> : <span id="fc">0</span></p>
+  <button class="btn" id="retryBtn">↻ Play again</button>
+</div>
+
+<script>
+const cv=document.getElementById('game'),ctx=cv.getContext('2d');
+const W=560,H=400,KEY='bb_wins_pong',WIN=5;
+let py,cy,ball,ps,cs,wins=+localStorage.getItem(KEY)||0,raf=null,running=false,serveT=0;
+document.getElementById('wins').textContent=wins;
+const PH=80,PW=10;
+
+function reset(full){
+  if(full){ps=0;cs=0;}
+  py=H/2-PH/2;cy=H/2-PH/2;
+  serve(Math.random()<0.5?1:-1);
+  updateHud();
+}
+function serve(dir){
+  const a=(Math.random()*0.8-0.4);
+  ball={x:W/2,y:H/2,vx:Math.cos(a)*4.2*dir,vy:Math.sin(a)*4.2,r:8};
+  serveT=50;
+}
+function updateHud(){
+  document.getElementById('ps').textContent=ps;
+  document.getElementById('cs').textContent=cs;
+  document.getElementById('wins').textContent=wins;
+}
+function loop(){
+  if(!running)return;
+  if(keys.up)py-=6;if(keys.down)py+=6;
+  py=Math.max(0,Math.min(H-PH,py));
+  // AI
+  const aiSpeed=3.4+Math.min(ps+cs,8)*0.12;
+  const target=ball.y-PH/2;
+  cy+=Math.max(-aiSpeed,Math.min(aiSpeed,target-cy));
+  cy=Math.max(0,Math.min(H-PH,cy));
+  if(serveT>0){serveT--;}
+  else{
+    ball.x+=ball.vx;ball.y+=ball.vy;
+    if(ball.y<ball.r||ball.y>H-ball.r)ball.vy*=-1;
+    // player paddle
+    if(ball.vx<0&&ball.x-ball.r<=PW+8&&ball.x>4&&ball.y>py-4&&ball.y<py+PH+4){
+      const rel=(ball.y-(py+PH/2))/(PH/2),sp=Math.min(Math.hypot(ball.vx,ball.vy)*1.06,9);
+      ball.vx=Math.cos(rel*1.0)*sp;ball.vy=Math.sin(rel*1.0)*sp;ball.x=PW+8+ball.r;
+    }
+    // cpu paddle
+    if(ball.vx>0&&ball.x+ball.r>=W-PW-8&&ball.x<W-4&&ball.y>cy-4&&ball.y<cy+PH+4){
+      const rel=(ball.y-(cy+PH/2))/(PH/2),sp=Math.min(Math.hypot(ball.vx,ball.vy)*1.06,9);
+      ball.vx=-Math.cos(rel*1.0)*sp;ball.vy=Math.sin(rel*1.0)*sp;ball.x=W-PW-8-ball.r;
+    }
+    if(ball.x<-20){cs++;afterPoint();}
+    if(ball.x>W+20){ps++;afterPoint();}
+  }
+  draw();raf=requestAnimationFrame(loop);
+}
+function afterPoint(){
+  updateHud();
+  if(ps>=WIN||cs>=WIN){endMatch();return;}
+  serve(ps>=cs?1:-1);
+}
+function endMatch(){
+  running=false;cancelAnimationFrame(raf);
+  const won=ps>=WIN;
+  if(won){wins++;localStorage.setItem(KEY,wins);}
+  document.getElementById('overEmoji').textContent=won?'🏆':'🤖';
+  document.getElementById('overTitle').textContent=won?'You win!':'CPU wins';
+  document.getElementById('fp').textContent=ps;
+  document.getElementById('fc').textContent=cs;
+  document.getElementById('overOv').classList.remove('hidden');
+  updateHud();
+}
+function draw(){
+  ctx.fillStyle='#0a0e1a';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(99,179,237,.3)';ctx.setLineDash([8,8]);ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(W/2,0);ctx.lineTo(W/2,H);ctx.stroke();ctx.setLineDash([]);
+  // paddles
+  let g=ctx.createLinearGradient(0,0,PW,0);g.addColorStop(0,'#22d3ee');g.addColorStop(1,'#0ea5e9');
+  ctx.fillStyle=g;ctx.beginPath();ctx.roundRect(8,py,PW,PH,5);ctx.fill();
+  g=ctx.createLinearGradient(W-PW,0,W,0);g.addColorStop(0,'#f472b6');g.addColorStop(1,'#e11d48');
+  ctx.fillStyle=g;ctx.beginPath();ctx.roundRect(W-PW-8,cy,PW,PH,5);ctx.fill();
+  // ball
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,7);ctx.fill();
+  // score big
+  ctx.fillStyle='rgba(255,255,255,.08)';ctx.font='900 64px sans-serif';
+  ctx.textAlign='center';ctx.fillText(ps,W/2-60,80);ctx.fillText(cs,W/2+60,80);
+}
+function start(){
+  document.getElementById('startOv').classList.add('hidden');
+  document.getElementById('overOv').classList.add('hidden');
+  reset(true);running=true;loop();
+}
+document.getElementById('startBtn').onclick=start;
+document.getElementById('retryBtn').onclick=start;
+
+const keys={up:false,down:false};
+document.addEventListener('keydown',e=>{
+  if(e.code==='ArrowUp'||e.code==='KeyW')keys.up=true;
+  if(e.code==='ArrowDown'||e.code==='KeyS')keys.down=true;
+});
+document.addEventListener('keyup',e=>{
+  if(e.code==='ArrowUp'||e.code==='KeyW')keys.up=false;
+  if(e.code==='ArrowDown'||e.code==='KeyS')keys.down=false;
+});
+function setPy(e){
+  const r=cv.getBoundingClientRect();
+  const cy2=(e.touches?e.touches[0].clientY:e.clientY);
+  py=(cy2-r.top)/r.height*H-PH/2;
+}
+cv.addEventListener('pointermove',e=>{if(running)setPy(e);});
+cv.addEventListener('pointerdown',e=>{if(running)setPy(e);});
+cv.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+reset(true);draw();
+</script>
+</body>
+</html>

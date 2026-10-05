@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+<title>🔨 Whack — BrainBlast</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#05070c;color:#e2e8f0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+#top{width:min(94vw,400px);display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.back{color:#63b3ed;text-decoration:none;font-weight:700;font-size:14px}
+#hud{display:flex;gap:8px}
+.pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:6px 12px;border-radius:999px;font-size:14px;font-weight:700}
+#timebar{width:min(94vw,400px);height:10px;background:rgba(255,255,255,.08);border-radius:999px;margin-bottom:12px;overflow:hidden}
+#timefill{height:100%;width:100%;background:linear-gradient(90deg,#4ade80,#fbbf24,#f87171);border-radius:999px;transition:width .2s linear}
+#board{width:min(94vw,400px);display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.hole{aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 60%,#02040a 55%,#16203a 100%);border:2px solid rgba(99,179,237,.18);display:flex;align-items:center;justify-content:center;font-size:52px;cursor:pointer;touch-action:manipulation;overflow:hidden}
+.hole .m{transform:translateY(110%);transition:transform .12s}
+.hole.up .m{transform:translateY(0)}
+.hole.bop{border-color:#4ade80}
+.overlay{position:fixed;inset:0;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;background:rgba(5,7,12,.88);z-index:10;text-align:center;padding:20px}
+.overlay h1{font-size:30px}
+.overlay p{color:#94a3b8;font-size:14px;line-height:1.7;max-width:330px}
+.overlay .sc{font-size:20px;color:#fff;font-weight:800}
+.btn{background:linear-gradient(135deg,#63b3ed,#2563eb);border:none;color:#fff;font-weight:800;font-size:16px;padding:12px 38px;border-radius:999px;cursor:pointer}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="top">
+  <a class="back" href="../brainblast.html">← BrainBlast</a>
+  <div id="hud"><span class="pill">🔨 <span id="score">0</span></span><span class="pill">⏱️ <span id="tleft">30</span>s</span><span class="pill">🏆 <span id="best">0</span></span></div>
+</div>
+<div id="timebar"><div id="timefill"></div></div>
+<div id="board"></div>
+
+<div class="overlay" id="startOv">
+  <h1>🔨</h1><h1>Whack-a-Mole</h1>
+  <p>Moles pop up for 30 seconds — tap them as fast as you can! Each whack scores a point.</p>
+  <button class="btn" id="startBtn">▶ Play</button>
+</div>
+<div class="overlay hidden" id="overOv">
+  <h1>⏰</h1><h1>Time's up!</h1>
+  <p class="sc">Whacked: <span id="final">0</span></p>
+  <p class="sc" style="font-size:15px;color:#94a3b8">Best: <span id="finalBest">0</span> <span id="newBest" style="color:#4ade80"></span></p>
+  <button class="btn" id="retryBtn">↻ Play again</button>
+</div>
+
+<script>
+const KEY='bb_best_whack',DUR=30;
+const board=document.getElementById('board');
+let holes,score,best=+localStorage.getItem(KEY)||0,running=false,endAt,popT,tickT,upIdx=-1;
+document.getElementById('best').textContent=best;
+
+function build(){
+  board.innerHTML='';holes=[];
+  for(let i=0;i<9;i++){
+    const h=document.createElement('div');h.className='hole';
+    h.innerHTML='<span class="m">🐹</span>';
+    h.addEventListener('pointerdown',()=>whack(i));
+    board.appendChild(h);holes.push(h);
+  }
+}
+function whack(i){
+  if(!running||i!==upIdx)return;
+  score++;document.getElementById('score').textContent=score;
+  holes[i].classList.add('bop');
+  holes[i].querySelector('.m').textContent='💥';
+  hideMole();
+  setTimeout(()=>{holes[i].classList.remove('bop');holes[i].querySelector('.m').textContent='🐹';},150);
+  schedulePop(120);
+}
+function hideMole(){if(upIdx>=0){holes[upIdx].classList.remove('up');upIdx=-1;}}
+function schedulePop(delay){
+  clearTimeout(popT);
+  if(!running)return;
+  popT=setTimeout(()=>{
+    hideMole();
+    upIdx=(Math.random()*9)|0;
+    holes[upIdx].classList.add('up');
+    schedulePop(450+Math.random()*550);
+  },delay);
+}
+function tick(){
+  if(!running)return;
+  const left=Math.max(0,Math.ceil((endAt-Date.now())/1000));
+  document.getElementById('tleft').textContent=left;
+  document.getElementById('timefill').style.width=(left/DUR*100)+'%';
+  if(left<=0){finish();return;}
+  tickT=setTimeout(tick,200);
+}
+function finish(){
+  running=false;clearTimeout(popT);clearTimeout(tickT);hideMole();
+  if(score>best){best=score;localStorage.setItem(KEY,best);document.getElementById('newBest').textContent='🎉 NEW!';}
+  else document.getElementById('newBest').textContent='';
+  document.getElementById('final').textContent=score;
+  document.getElementById('finalBest').textContent=best;
+  document.getElementById('best').textContent=best;
+  document.getElementById('overOv').classList.remove('hidden');
+}
+function start(){
+  document.getElementById('startOv').classList.add('hidden');
+  document.getElementById('overOv').classList.add('hidden');
+  score=0;document.getElementById('score').textContent='0';
+  document.getElementById('timefill').style.width='100%';
+  running=true;endAt=Date.now()+DUR*1000;
+  schedulePop(400);tick();
+}
+document.getElementById('startBtn').onclick=start;
+document.getElementById('retryBtn').onclick=start;
+build();
+</script>
+</body>
+</html>

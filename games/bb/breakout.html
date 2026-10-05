@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+<title>🧱 Breakout — BrainBlast</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#05070c;color:#e2e8f0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+#top{width:min(94vw,400px);display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.back{color:#63b3ed;text-decoration:none;font-weight:700;font-size:14px}
+#hud{display:flex;gap:8px}
+.pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:6px 12px;border-radius:999px;font-size:14px;font-weight:700}
+canvas{width:min(94vw,400px);height:auto;border-radius:16px;border:2px solid rgba(99,179,237,.25);background:#0a0e1a;touch-action:none;display:block;cursor:none}
+.overlay{position:fixed;inset:0;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;background:rgba(5,7,12,.88);z-index:10;text-align:center;padding:20px}
+.overlay h1{font-size:30px}
+.overlay p{color:#94a3b8;font-size:14px;line-height:1.7;max-width:330px}
+.overlay .sc{font-size:20px;color:#fff;font-weight:800}
+.btn{background:linear-gradient(135deg,#63b3ed,#2563eb);border:none;color:#fff;font-weight:800;font-size:16px;padding:12px 38px;border-radius:999px;cursor:pointer}
+.hidden{display:none!important}
+#hint{color:#5b6b8c;font-size:12px;margin-top:10px}
+</style>
+</head>
+<body>
+<div id="top">
+  <a class="back" href="../brainblast.html">← BrainBlast</a>
+  <div id="hud"><span class="pill">⭐ <span id="score">0</span></span><span class="pill">❤️ <span id="lives">3</span></span><span class="pill">🏆 <span id="best">0</span></span></div>
+</div>
+<canvas id="game" width="400" height="560"></canvas>
+<div id="hint">🖱️ Move mouse / drag finger &nbsp;·&nbsp; ⌨️ ← →</div>
+
+<div class="overlay" id="startOv">
+  <h1>🧱</h1><h1>Breakout</h1>
+  <p>Move the paddle, bounce the ball, smash every brick. Don't let the ball fall! Each cleared board speeds things up.</p>
+  <button class="btn" id="startBtn">▶ Play</button>
+</div>
+<div class="overlay hidden" id="overOv">
+  <h1 id="overEmoji">💥</h1><h1 id="overTitle">Game Over</h1>
+  <p class="sc">Score: <span id="final">0</span></p>
+  <p class="sc" style="font-size:15px;color:#94a3b8">Best: <span id="finalBest">0</span></p>
+  <button class="btn" id="retryBtn">↻ Play again</button>
+</div>
+
+<script>
+const cv=document.getElementById('game'),ctx=cv.getContext('2d');
+const W=400,H=560,KEY='bb_best_breakout';
+const COLORS=['#f472b6','#a78bfa','#22d3ee','#4ade80','#fbbf24'];
+let paddle,ball,bricks,score,lives,best=+localStorage.getItem(KEY)||0,level,raf=null,running=false;
+document.getElementById('best').textContent=best;
+
+function buildBricks(){
+  bricks=[];const cols=7,rows=5,gap=8,bw=(W-20-gap*(cols-1))/cols,bh=22;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)
+    bricks.push({x:10+c*(bw+gap),y:60+r*(bh+gap),w:bw,h:bh,alive:true,color:COLORS[r%COLORS.length]});
+}
+function reset(full){
+  if(full){score=0;lives=3;level=1;}
+  paddle={w:76,h:12,x:W/2-38,y:H-44};
+  const sp=3.6+level*0.5,a=-Math.PI/2+(Math.random()*0.6-0.3);
+  ball={x:W/2,y:H-70,r:7,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,stuck:true};
+  buildBricks();updateHud();
+}
+function updateHud(){
+  document.getElementById('score').textContent=score;
+  document.getElementById('lives').textContent=lives;
+  document.getElementById('best').textContent=best;
+}
+function loop(){
+  if(!running)return;
+  // paddle keys
+  if(keys.left)paddle.x-=6;if(keys.right)paddle.x+=6;
+  paddle.x=Math.max(0,Math.min(W-paddle.w,paddle.x));
+  if(ball.stuck){ball.x=paddle.x+paddle.w/2;ball.y=paddle.y-12;}
+  else{
+    ball.x+=ball.vx;ball.y+=ball.vy;
+    if(ball.x<ball.r||ball.x>W-ball.r)ball.vx*=-1;
+    if(ball.y<ball.r)ball.vy*=-1;
+    // paddle bounce
+    if(ball.vy>0&&ball.y+ball.r>=paddle.y&&ball.y+ball.r<=paddle.y+paddle.h+10&&ball.x>paddle.x-ball.r&&ball.x<paddle.x+paddle.w+ball.r){
+      const rel=(ball.x-(paddle.x+paddle.w/2))/(paddle.w/2);
+      const sp=Math.hypot(ball.vx,ball.vy),ang=-Math.PI/2+rel*1.1;
+      ball.vx=Math.cos(ang)*sp;ball.vy=Math.sin(ang)*sp;ball.y=paddle.y-ball.r-1;
+    }
+    // bricks
+    for(const b of bricks){
+      if(!b.alive)continue;
+      if(ball.x+ball.r>b.x&&ball.x-ball.r<b.x+b.w&&ball.y+ball.r>b.y&&ball.y-ball.r<b.y+b.h){
+        b.alive=false;ball.vy*=-1;score+=10;
+        if(score>best){best=score;localStorage.setItem(KEY,best);}
+        updateHud();break;
+      }
+    }
+    if(ball.y>H+20){
+      lives--;updateHud();
+      if(lives<=0){end(false);return;}
+      const sp=3.6+level*0.5,a=-Math.PI/2+(Math.random()*0.6-0.3);
+      ball={x:paddle.x+paddle.w/2,y:paddle.y-12,r:7,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,stuck:true};
+    }
+    if(bricks.every(b=>!b.alive)){level++;reset(false);ball.stuck=false;}
+  }
+  draw();
+  raf=requestAnimationFrame(loop);
+}
+function draw(){
+  ctx.fillStyle='#0a0e1a';ctx.fillRect(0,0,W,H);
+  for(const b of bricks){if(!b.alive)continue;ctx.fillStyle=b.color;
+    ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,5);ctx.fill();}
+  // paddle
+  const g=ctx.createLinearGradient(paddle.x,0,paddle.x+paddle.w,0);
+  g.addColorStop(0,'#22d3ee');g.addColorStop(1,'#a78bfa');
+  ctx.fillStyle=g;ctx.beginPath();ctx.roundRect(paddle.x,paddle.y,paddle.w,paddle.h,6);ctx.fill();
+  // ball
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,7);ctx.fill();
+  ctx.fillStyle='#22d3ee';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r/2,0,7);ctx.fill();
+}
+function end(win){
+  running=false;cancelAnimationFrame(raf);
+  document.getElementById('overEmoji').textContent=win?'🏆':'💥';
+  document.getElementById('overTitle').textContent=win?'You cleared it all!':'Game Over';
+  document.getElementById('final').textContent=score;
+  document.getElementById('finalBest').textContent=best;
+  document.getElementById('overOv').classList.remove('hidden');
+}
+function launch(){ball.stuck=false;}
+function start(){
+  document.getElementById('startOv').classList.add('hidden');
+  document.getElementById('overOv').classList.add('hidden');
+  reset(true);running=true;loop();
+}
+document.getElementById('startBtn').onclick=start;
+document.getElementById('retryBtn').onclick=start;
+
+const keys={left:false,right:false};
+document.addEventListener('keydown',e=>{
+  if(e.code==='ArrowLeft'||e.code==='KeyA')keys.left=true;
+  if(e.code==='ArrowRight'||e.code==='KeyD')keys.right=true;
+  if(e.code==='Space'&&running&&ball.stuck){e.preventDefault();launch();}
+});
+document.addEventListener('keyup',e=>{
+  if(e.code==='ArrowLeft'||e.code==='KeyA')keys.left=false;
+  if(e.code==='ArrowRight'||e.code==='KeyD')keys.right=false;
+});
+function pointerX(e){
+  const r=cv.getBoundingClientRect();
+  const cx=(e.touches?e.touches[0].clientX:e.clientX);
+  return (cx-r.left)/r.width*W;
+}
+cv.addEventListener('pointermove',e=>{
+  if(!running)return;
+  paddle.x=pointerX(e)-paddle.w/2;
+  if(ball.stuck)launch();
+});
+cv.addEventListener('pointerdown',e=>{if(running&&ball.stuck)launch();});
+cv.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+reset(true);draw();
+</script>
+</body>
+</html>

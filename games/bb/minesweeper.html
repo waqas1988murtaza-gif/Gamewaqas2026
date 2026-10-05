@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+<title>💣 Minesweeper — BrainBlast</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#05070c;color:#e2e8f0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;user-select:none;-webkit-user-select:none;padding:12px}
+#top{width:min(94vw,400px);display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.back{color:#63b3ed;text-decoration:none;font-weight:700;font-size:14px}
+#hud{display:flex;gap:8px}
+.pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:6px 12px;border-radius:999px;font-size:14px;font-weight:700}
+#board{width:min(94vw,400px);display:grid;grid-template-columns:repeat(9,1fr);gap:3px}
+.cell{aspect-ratio:1;border-radius:6px;background:#16203a;border:1px solid rgba(99,179,237,.18);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;cursor:pointer;touch-action:manipulation;color:#fff}
+.cell:active{background:#1e2c52}
+.cell.open{background:#0a0e1a;cursor:default}
+.cell.boom{background:#7f1d1d}
+.n1{color:#63b3ed}.n2{color:#4ade80}.n3{color:#fbbf24}.n4{color:#f472b6}.n5{color:#a78bfa}.n6{color:#22d3ee}.n7{color:#fb923c}.n8{color:#f87171}
+#flagBtn{margin-top:12px;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.15);color:#fff;font-weight:800;font-size:15px;padding:10px 26px;border-radius:999px;cursor:pointer}
+#flagBtn.on{background:rgba(251,191,36,.2);border-color:#fbbf24}
+.overlay{position:fixed;inset:0;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;background:rgba(5,7,12,.88);z-index:10;text-align:center;padding:20px}
+.overlay h1{font-size:30px}
+.overlay p{color:#94a3b8;font-size:14px;line-height:1.7;max-width:340px}
+.overlay .sc{font-size:19px;color:#fff;font-weight:800}
+.btn{background:linear-gradient(135deg,#63b3ed,#2563eb);border:none;color:#fff;font-weight:800;font-size:16px;padding:12px 38px;border-radius:999px;cursor:pointer}
+.hidden{display:none!important}
+#hint{color:#5b6b8c;font-size:12px;margin-top:8px;text-align:center}
+</style>
+</head>
+<body>
+<div id="top">
+  <a class="back" href="../brainblast.html">← BrainBlast</a>
+  <div id="hud"><span class="pill">💣 <span id="mines">10</span></span><span class="pill">⏱️ <span id="time">0s</span></span><span class="pill">🏆 <span id="best">–</span></span></div>
+</div>
+<div id="board"></div>
+<button id="flagBtn">🚩 Flag mode: OFF</button>
+<div id="hint">Tap to reveal · 🚩 mode (or right-click / long-press) to flag</div>
+
+<div class="overlay" id="startOv">
+  <h1>💣</h1><h1>Minesweeper</h1>
+  <p>Clear the field without hitting a mine. Numbers tell you how many mines touch that square. First tap is always safe!</p>
+  <button class="btn" id="startBtn">▶ Play</button>
+</div>
+<div class="overlay hidden" id="overOv">
+  <h1 id="overEmoji">💥</h1><h1 id="overTitle">Boom!</h1>
+  <p class="sc" id="overStats"></p>
+  <button class="btn" id="retryBtn">↻ Play again</button>
+</div>
+
+<script>
+const N=9,MINES=10,KEY='bb_best_minesweeper';
+const boardEl=document.getElementById('board');
+let grid,minesSet,opened,flagged,over,started,secs,timerInt,flagMode=false;
+let best=+localStorage.getItem(KEY)||0;
+if(best)document.getElementById('best').textContent=best+'s';
+
+function reset(){
+  grid=[];minesSet=new Set();opened=0;flagged=0;over=false;started=false;secs=0;flagMode=false;
+  clearInterval(timerInt);
+  document.getElementById('flagBtn').textContent='🚩 Flag mode: OFF';
+  document.getElementById('flagBtn').classList.remove('on');
+  document.getElementById('mines').textContent=MINES;
+  document.getElementById('time').textContent='0s';
+  boardEl.innerHTML='';
+  for(let i=0;i<N*N;i++){
+    grid.push({mine:false,open:false,flag:false,n:0,el:null});
+    const c=document.createElement('div');c.className='cell';c.dataset.i=i;
+    grid[i].el=c;
+    c.addEventListener('pointerdown',e=>{e.preventDefault();onTap(i,e);});
+    c.addEventListener('contextmenu',e=>{e.preventDefault();toggleFlag(i);});
+    let lpT=null;
+    c.addEventListener('touchstart',()=>{lpT=setTimeout(()=>toggleFlag(i),450);},{passive:true});
+    c.addEventListener('touchend',()=>clearTimeout(lpT));
+    boardEl.appendChild(c);
+  }
+}
+function neighbors(i){
+  const r=(i/N)|0,c=i%N,out=[];
+  for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
+    if(!dr&&!dc)continue;const nr=r+dr,nc=c+dc;
+    if(nr>=0&&nr<N&&nc>=0&&nc<N)out.push(nr*N+nc);
+  }return out;
+}
+function placeMines(safe){
+  const banned=new Set([safe,...neighbors(safe)]);
+  while(minesSet.size<MINES){
+    const i=(Math.random()*N*N)|0;
+    if(!banned.has(i))minesSet.add(i);
+  }
+  for(const m of minesSet){grid[m].mine=true;for(const n of neighbors(m))grid[n].n++;}
+}
+function onTap(i,e){
+  if(over)return;
+  if(flagMode){toggleFlag(i);return;}
+  reveal(i);
+}
+function toggleFlag(i){
+  if(over)return;const g=grid[i];
+  if(g.open)return;
+  g.flag=!g.flag;flagged+=g.flag?1:-1;
+  g.el.textContent=g.flag?'🚩':'';
+  document.getElementById('mines').textContent=MINES-flagged;
+}
+function reveal(i){
+  const g=grid[i];
+  if(g.open||g.flag||over)return;
+  if(!started){started=true;placeMines(i);
+    timerInt=setInterval(()=>{secs++;document.getElementById('time').textContent=secs+'s';},1000);}
+  if(g.mine){ // boom
+    over=true;clearInterval(timerInt);
+    g.el.classList.add('boom');g.el.textContent='💣';
+    for(const m of minesSet){grid[m].el.textContent='💣';if(!grid[m].open)grid[m].el.classList.add('open');}
+    setTimeout(()=>end(false),600);return;
+  }
+  flood(i);
+  if(opened===N*N-MINES){over=true;clearInterval(timerInt);end(true);}
+}
+function flood(i){
+  const g=grid[i];
+  if(g.open||g.flag||g.mine)return;
+  g.open=true;opened++;
+  g.el.classList.add('open');
+  if(g.n>0){g.el.textContent=g.n;g.el.classList.add('n'+g.n);}
+  else{g.el.textContent='';for(const n of neighbors(i))flood(n);}
+}
+function end(win){
+  document.getElementById('overEmoji').textContent=win?'🏆':'💥';
+  document.getElementById('overTitle').textContent=win?'Field cleared!':'Boom!';
+  let extra='';
+  if(win){
+    extra=`Cleared in ${secs}s`;
+    if(!best||secs<best){best=secs;localStorage.setItem(KEY,best);extra+=' 🎉 NEW BEST!';}
+    document.getElementById('best').textContent=best+'s';
+  }else extra=`${opened} squares cleared`;
+  document.getElementById('overStats').textContent=extra;
+  document.getElementById('overOv').classList.remove('hidden');
+}
+function start(){
+  document.getElementById('startOv').classList.add('hidden');
+  document.getElementById('overOv').classList.add('hidden');
+  reset();
+}
+document.getElementById('startBtn').onclick=start;
+document.getElementById('retryBtn').onclick=start;
+document.getElementById('flagBtn').onclick=function(){
+  flagMode=!flagMode;
+  this.textContent='🚩 Flag mode: '+(flagMode?'ON':'OFF');
+  this.classList.toggle('on',flagMode);
+};
+reset();
+</script>
+</body>
+</html>

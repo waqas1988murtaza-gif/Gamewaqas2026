@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+<title>🔊 Simon — BrainBlast</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#05070c;color:#e2e8f0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+#top{width:min(94vw,400px);display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.back{color:#63b3ed;text-decoration:none;font-weight:700;font-size:14px}
+#hud{display:flex;gap:8px}
+.pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:6px 12px;border-radius:999px;font-size:14px;font-weight:700}
+#pads{width:min(94vw,400px);display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pad{aspect-ratio:1.4;border-radius:18px;cursor:pointer;opacity:.45;transition:opacity .12s,transform .1s,box-shadow .12s;border:2px solid rgba(255,255,255,.08);touch-action:manipulation}
+.pad:active{transform:scale(.96)}
+.pad.lit{opacity:1;box-shadow:0 0 30px currentColor}
+#pad0{background:#16a34a;color:#4ade80}
+#pad1{background:#dc2626;color:#f87171}
+#pad2{background:#ca8a04;color:#fbbf24}
+#pad3{background:#2563eb;color:#60a5fa}
+#status{margin-top:14px;color:#94a3b8;font-size:15px;font-weight:700;min-height:22px;text-align:center}
+.overlay{position:fixed;inset:0;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;background:rgba(5,7,12,.88);z-index:10;text-align:center;padding:20px}
+.overlay h1{font-size:30px}
+.overlay p{color:#94a3b8;font-size:14px;line-height:1.7;max-width:330px}
+.overlay .sc{font-size:20px;color:#fff;font-weight:800}
+.btn{background:linear-gradient(135deg,#63b3ed,#2563eb);border:none;color:#fff;font-weight:800;font-size:16px;padding:12px 38px;border-radius:999px;cursor:pointer}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="top">
+  <a class="back" href="../brainblast.html">← BrainBlast</a>
+  <div id="hud"><span class="pill">🔁 Round <span id="round">0</span></span><span class="pill">🏆 Best <span id="best">0</span></span></div>
+</div>
+<div id="pads">
+  <div class="pad" id="pad0" data-p="0"></div>
+  <div class="pad" id="pad1" data-p="1"></div>
+  <div class="pad" id="pad2" data-p="2"></div>
+  <div class="pad" id="pad3" data-p="3"></div>
+</div>
+<div id="status"></div>
+
+<div class="overlay" id="startOv">
+  <h1>🔊</h1><h1>Simon</h1>
+  <p>Watch the flashing sequence, then repeat it by tapping the pads in the same order. Each round adds one more step!</p>
+  <button class="btn" id="startBtn">▶ Play</button>
+</div>
+<div class="overlay hidden" id="overOv">
+  <h1>❌</h1><h1>Wrong pad!</h1>
+  <p class="sc">Reached round <span id="final">0</span></p>
+  <p class="sc" style="font-size:15px;color:#94a3b8">Best: round <span id="finalBest">0</span> <span id="newBest" style="color:#4ade80"></span></p>
+  <button class="btn" id="retryBtn">↻ Play again</button>
+</div>
+
+<script>
+const KEY='bb_best_simon',FREQS=[329.6,261.6,392.0,440.0];
+const pads=[...document.querySelectorAll('.pad')];
+let seq,idx,round,best=+localStorage.getItem(KEY)||0,accepting=false,ac=null;
+document.getElementById('best').textContent=best;
+const statusEl=document.getElementById('status');
+
+function beep(f,dur=0.28){
+  try{
+    ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+    const o=ac.createOscillator(),g=ac.createGain();
+    o.type='sine';o.frequency.value=f;
+    g.gain.setValueAtTime(0.25,ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+dur);
+    o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+dur);
+  }catch(e){}
+}
+function lit(p,dur=350){
+  return new Promise(res=>{
+    pads[p].classList.add('lit');beep(FREQS[p],dur/1000);
+    setTimeout(()=>{pads[p].classList.remove('lit');setTimeout(res,120);},dur);
+  });
+}
+async function playSeq(){
+  accepting=false;statusEl.textContent='👀 Watch…';
+  await new Promise(r=>setTimeout(r,500));
+  for(const p of seq)await lit(p,Math.max(200,380-seq.length*8));
+  idx=0;accepting=true;statusEl.textContent='👆 Your turn';
+}
+function nextRound(){
+  round++;seq.push((Math.random()*4)|0);
+  document.getElementById('round').textContent=round;
+  playSeq();
+}
+function gameOver(){
+  accepting=false;
+  if(round>best){best=round;localStorage.setItem(KEY,best);document.getElementById('newBest').textContent='🎉 NEW!';}
+  else document.getElementById('newBest').textContent='';
+  document.getElementById('final').textContent=round;
+  document.getElementById('finalBest').textContent=best;
+  document.getElementById('best').textContent=best;
+  statusEl.textContent='';
+  setTimeout(()=>document.getElementById('overOv').classList.remove('hidden'),400);
+}
+pads.forEach(p=>{
+  p.addEventListener('pointerdown',async ()=>{
+    if(!accepting)return;
+    const v=+p.dataset.p;
+    pads[v].classList.add('lit');beep(FREQS[v],0.25);
+    setTimeout(()=>pads[v].classList.remove('lit'),220);
+    if(v===seq[idx]){idx++;if(idx===seq.length){accepting=false;statusEl.textContent='✅ Nice!';setTimeout(nextRound,700);}}
+    else gameOver();
+  });
+});
+function start(){
+  document.getElementById('startOv').classList.add('hidden');
+  document.getElementById('overOv').classList.add('hidden');
+  seq=[];round=0;nextRound();
+}
+document.getElementById('startBtn').onclick=start;
+document.getElementById('retryBtn').onclick=start;
+</script>
+</body>
+</html>

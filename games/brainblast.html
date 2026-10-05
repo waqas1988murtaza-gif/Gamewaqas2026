@@ -3,7 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BrainBlast — Premium Arcade & Logic Games</title>
+<title>BrainBlast — 9 Original Arcade & Logic Games</title>
+<meta name="description" content="BrainBlast: 9 original arcade & logic games built from scratch — Snake, Breakout, Flappy, Memory Match, Minesweeper, Pong, Simon, Whack-a-Mole and Dodge. Free, no download.">
+<meta name="theme-color" content="#05070c">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -20,7 +23,7 @@
   --insane: #f87171;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans','Segoe UI',system-ui,sans-serif;min-height:100vh;overflow-x:hidden;}
 
 .grid-bg{position:fixed;inset:0;background-image:linear-gradient(rgba(99,179,237,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(99,179,237,0.02) 1px,transparent 1px);background-size:50px 50px;z-index:0;pointer-events:none;}
 
@@ -28,11 +31,13 @@ header{position:sticky;top:0;z-index:100;background:rgba(5,7,12,0.9);backdrop-fi
 .header-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;}
 .logo{display:flex;align-items:center;gap:12px;text-decoration:none;}
 .logo-mark{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),#2563eb);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-weight:900;color:#fff;box-shadow:0 0 15px rgba(99,179,237,0.3);}
-.logo-name{font-family:'Orbitron',monospace;font-weight:700;font-size:1.2rem;letter-spacing:1px;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.logo-name{font-family:'Orbitron',monospace;font-weight:700;font-size:1.2rem;letter-spacing:1px;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;}
+.back-hub{color:var(--muted);text-decoration:none;font-size:.85rem;font-weight:600;}
+.back-hub:hover{color:var(--accent);}
 
 .hero{position:relative;z-index:5;padding:40px 24px 20px;text-align:center;max-width:800px;margin:0 auto;}
-.hero h1{font-family:'Orbitron',monospace;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;margin-bottom:10px;background:linear-gradient(90deg,#63b3ed,#f6ad55);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.hero p{color:var(--muted);font-size:0.95rem;}
+.hero h1{font-family:'Orbitron',monospace;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:900;margin-bottom:10px;background:linear-gradient(90deg,#63b3ed,#f6ad55);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;}
+.hero p{color:var(--muted);font-size:0.95rem;line-height:1.6;}
 
 .main-wrap{position:relative;z-index:5;max-width:1400px;margin:0 auto;padding:0 24px 60px;display:grid;grid-template-columns:1fr 300px;gap:28px;}
 @media(max-width:1100px){.main-wrap{grid-template-columns:1fr;}}
@@ -48,6 +53,7 @@ header{position:sticky;top:0;z-index:100;background:rgba(5,7,12,0.9);backdrop-fi
 .game-card:hover .game-thumb{transform:scale(1.05);}
 .game-info{padding:16px;background:var(--surface);}
 .game-name{font-weight:700;font-size:0.95rem;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.game-desc{color:var(--muted);font-size:.78rem;line-height:1.5;margin-bottom:10px;min-height:2.3em;}
 .difficulty-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;}
 .d-easy{background:rgba(74,222,128,0.1);color:var(--easy);border:1px solid rgba(74,222,128,0.2);}
 .d-hard{background:rgba(251,146,60,0.1);color:var(--hard);border:1px solid rgba(251,146,60,0.2);}
@@ -55,27 +61,27 @@ header{position:sticky;top:0;z-index:100;background:rgba(5,7,12,0.9);backdrop-fi
 
 .sidebar-panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.3);}
 .sp-head{font-family:'Orbitron',monospace;font-size:0.85rem;font-weight:700;margin-bottom:15px;color:var(--accent2);text-transform:uppercase;letter-spacing:1px;}
-.lb-item{padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.9rem;display:flex;justify-content:space-between;}
+.lb-item{padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:0.9rem;display:flex;justify-content:space-between;gap:8px;}
+.lb-empty{color:var(--muted);font-size:.85rem;line-height:1.6;}
 
-/* FIXED IMMERSIVE MODAL VIEWPORT FOR GUARANTEED FULLSCREEN */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(10px);}
+/* Modal — portrait-friendly game frame */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(10px);padding:12px;}
 .modal-overlay.open{display:flex;}
-.modal{background:var(--surface2);border:1px solid var(--accent);border-radius:24px;width:95%;max-width:850px;overflow:hidden;box-shadow:0 0 40px rgba(99,179,237,0.25);}
-.modal-header{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--surface);}
-.modal-title{font-family:'Orbitron',monospace;font-weight:700;color:#fff;}
-.action-btns{display:flex;gap:12px;}
-.m-btn{border:none;color:#fff;padding:10px 18px;border-radius:10px;cursor:pointer;font-size:0.85rem;font-weight:700;font-family:'Orbitron',sans-serif;transition:0.2s;}
+.modal{background:var(--surface2);border:1px solid var(--accent);border-radius:24px;width:min(100%,500px);overflow:hidden;box-shadow:0 0 40px rgba(99,179,237,0.25);max-height:94vh;display:flex;flex-direction:column;}
+.modal-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--surface);gap:10px;}
+.modal-title{font-family:'Orbitron',monospace;font-weight:700;color:#fff;font-size:.95rem;}
+.action-btns{display:flex;gap:10px;}
+.m-btn{border:none;color:#fff;padding:9px 14px;border-radius:10px;cursor:pointer;font-size:0.8rem;font-weight:700;font-family:'Orbitron',monospace;transition:0.2s;}
 .btn-fs{background:linear-gradient(135deg,var(--accent),#2563eb);}
 .btn-fs:hover{box-shadow:0 0 15px rgba(99,179,237,0.4);}
 .btn-cl{background:#dc2626;}
-
 .modal-body{padding:10px;background:#000;display:flex;justify-content:center;align-items:center;}
-.game-frame-wrapper{width:100%;aspect-ratio:16/10;max-height:70vh;border-radius:14px;overflow:hidden;background:#000;}
-.game-frame-wrapper iframe{width:100%;height:100%;border:none;}
+.game-frame-wrapper{width:100%;aspect-ratio:3/4;max-height:76vh;border-radius:14px;overflow:hidden;background:#000;}
+.game-frame-wrapper iframe{width:100%;height:100%;border:none;display:block;}
 
 footer{border-top:1px solid var(--border);padding:30px 24px;background:var(--surface);margin-top:60px;}
-.footer-inner{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;}
-.credit-tag{font-family:'Orbitron',monospace;font-size:1.05rem;color:var(--accent2);font-weight:700;text-shadow:0 0 10px rgba(246,173,85,0.2);}
+.footer-inner{max-width:1400px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+.credit-tag{font-family:'Orbitron',monospace;font-size:1.05rem;color:var(--accent2);font-weight:700;}
 </style>
 </head>
 <body>
@@ -84,22 +90,23 @@ footer{border-top:1px solid var(--border);padding:30px 24px;background:var(--sur
 
 <header>
   <div class="header-inner">
-    <a class="logo" href="#">
+    <a class="logo" href="../index.html">
       <div class="logo-mark">B²</div>
-      <div class="logo-name">BrainBlast Premium</div>
+      <div class="logo-name">BrainBlast</div>
     </a>
+    <a class="back-hub" href="../index.html">← Waqas Game Hub</a>
   </div>
 </header>
 
 <div class="hero">
-  <h1>Premium Arcade & Retro Sound Puzzles</h1>
-  <p>High-graphics, fully animated open engines with 100% universal mobile fullscreen support.</p>
+  <h1>9 Original Arcade &amp; Logic Games</h1>
+  <p>Every game here is built from scratch — no downloads, no signups, no third-party embeds. Your best scores save right in your browser. 📱💻</p>
 </div>
 
 <div class="main-wrap">
   <div>
     <div class="section-head">
-      <div class="section-title">20 High-Graphics Sonic & Logic Games</div>
+      <div class="section-title">Pick a game</div>
       <div class="section-line"></div>
     </div>
     <div class="games-grid" id="gamesGrid"></div>
@@ -107,17 +114,15 @@ footer{border-top:1px solid var(--border);padding:30px 24px;background:var(--sur
 
   <div class="sidebar">
     <div class="sidebar-panel">
-      <div class="sp-head">🏆 Leaderboard</div>
-      <div class="lb-item"><span><strong>1.</strong> Waqas_Murtaza</span> <span style="color:var(--accent2)">48,200 pts</span></div>
-      <div class="lb-item"><span><strong>2.</strong> LogicNinja</span> <span style="color:var(--muted)">41,750 pts</span></div>
-      <div class="lb-item"><span><strong>3.</strong> BrainStorm</span> <span style="color:var(--muted)">38,400 pts</span></div>
+      <div class="sp-head">🏆 Your best scores</div>
+      <div id="leaderboard"></div>
     </div>
   </div>
 </div>
 
 <footer>
   <div class="footer-inner">
-    <p style="color:var(--muted); font-size:0.85rem;">© 2026 BrainBlast Gaming Arena.</p>
+    <p style="color:var(--muted); font-size:0.85rem;">© 2026 BrainBlast · part of <a href="../index.html" style="color:var(--accent)">Waqas Game Hub</a></p>
     <div class="credit-tag">👑 Made by Waqas Murtaza</div>
   </div>
 </footer>
@@ -125,9 +130,9 @@ footer{border-top:1px solid var(--border);padding:30px 24px;background:var(--sur
 <div class="modal-overlay" id="gameModal">
   <div class="modal" id="modalContainer">
     <div class="modal-header">
-      <div class="modal-title" id="modalTitle">Game Engine</div>
+      <div class="modal-title" id="modalTitle">Game</div>
       <div class="action-btns">
-        <button class="m-btn btn-fs" onclick="forceFullscreen()">⛶ FULLSCREEN PLACE</button>
+        <button class="m-btn btn-fs" onclick="forceFullscreen()">⛶ FULLSCREEN</button>
         <button class="m-btn btn-cl" onclick="closeGame()">✕ CLOSE</button>
       </div>
     </div>
@@ -138,72 +143,87 @@ footer{border-top:1px solid var(--border);padding:30px 24px;background:var(--sur
 </div>
 
 <script>
-// ==================== 20 PREMIUM ARCHIVE SERVERS WITH SOUND & MUSIC ====================
+// All games are original, local files — zero third-party embeds.
 const GAMES = [
-  { id:1, name:"Pacman Premium Retro", emoji:"🍒", diff:"hard", src:"https://liza-veta.github.io/pacman/" },
-  { id:2, name:"Tetris Deluxe Sound", emoji:"🧱", diff:"insane", src:"https://chvin.github.io/react-tetris/" },
-  { id:3, name:"Classic 2048 Original", emoji:"🔢", diff:"hard", src:"https://gabrielecirulli.github.io/2048/" },
-  { id:4, name:"Hextris Audio Engine", emoji:"⬢", diff:"insane", src:"https://hextris.io/" },
-  { id:5, name:"Flappy Bird Classic", emoji:"🐦", diff:"easy", src:"https://nebez.github.io/floppybird/" },
-  { id:6, name:"Chrome Dino Runner", emoji:"🦖", diff:"easy", src:"https://wayou.github.io/t-rex-runner/" },
-  { id:7, name:"Snake Arcade Sound", emoji:"🐍", diff:"easy", src:"https://patorjk.github.io/games/snake/" },
-  { id:8, name:"Space Invaders Sound", emoji:"👾", diff:"insane", src:"https://977055745.github.io/Space-Invaders/" },
-  { id:9, name:"Clumsy Bird Arcade", emoji:"🦅", diff:"easy", src:"https://ellisonleao.github.io/clumsy-bird/" },
-  { id:10, name:"Tower Stack Blocks", emoji:"🏢", diff:"hard", src:"https://heloises.github.io/tower_game/" },
-  { id:11, name:"Breakout Brick Smasher", emoji:"🥎", diff:"hard", src:"https://jakesgordon.github.io/javascript-breakout/" },
-  { id:12, name:"Classic Pong Audio", emoji:"🏓", diff:"easy", src:"https://jakesgordon.github.io/javascript-pong/" },
-  { id:13, name:"HTML5 Sonic Run", emoji:"🦔", diff:"hard", src:"https://vitor-mendes.github.io/sonic-html5/" },
-  { id:14, name:"MineSweeper Original", emoji:"💣", diff:"insane", src:"https://anderas.github.io/minesweeper/" },
-  { id:15, name:"Tic Tac Toe Deluxe", emoji:"❌", diff:"easy", src:"https://playtictactoe.org/" },
-  { id:16, name:"Color Tap Matrix", emoji:"🎨", diff:"hard", src:"https://fkiers.github.io/ColorTap/" },
-  { id:17, name:"Speed Typer Logic", emoji:"⌨️", diff:"hard", src:"https://bipinkrish.github.io/word-racer/" },
-  { id:18, name:"Fruit Ninja Web Clone", emoji:"🍉", diff:"hard", src:"https://jackie-zen.github.io/fruit-ninja/" },
-  { id:19, name:"Heads Up Logic", emoji:"🎯", diff:"easy", src:"https://marianoguerra.github.io/indie-game-mkr/" },
-  { id:20, name:"Grid Runner Infinite", emoji:"🏃", diff:"insane", src:"https://rembound.github.io/html5-canvas-game-boilerplate/" }
+  { id:'snake',      name:'Snake',          file:'bb/snake.html',      emoji:'🐍', diff:'easy',   desc:'Eat apples, grow long, dodge yourself. A timeless classic.' },
+  { id:'breakout',   name:'Breakout',       file:'bb/breakout.html',   emoji:'🧱', diff:'hard',   desc:'Bounce the ball, smash every brick, clear the board.' },
+  { id:'flappy',     name:'Flappy',         file:'bb/flappy.html',     emoji:'🐤', diff:'easy',   desc:'Tap to flap through the gaps. Simple, brutal, addictive.' },
+  { id:'memory',     name:'Memory Match',   file:'bb/memory.html',     emoji:'🃏', diff:'easy',   desc:'Find all 8 pairs in as few moves as you can.' },
+  { id:'minesweeper',name:'Minesweeper',    file:'bb/minesweeper.html',emoji:'💣', diff:'insane', desc:'Clear the minefield with pure logic. First tap is safe.' },
+  { id:'pong',       name:'Pong vs CPU',    file:'bb/pong.html',       emoji:'🏓', diff:'hard',   desc:'The original video game — first to 5 beats the computer.' },
+  { id:'simon',      name:'Simon',          file:'bb/simon.html',      emoji:'🔊', diff:'hard',   desc:'Repeat the growing light-and-sound sequence.' },
+  { id:'whack',      name:'Whack-a-Mole',   file:'bb/whack.html',      emoji:'🔨', diff:'easy',   desc:'30 seconds on the clock — whack every mole that pops!' },
+  { id:'dodge',      name:'Dodge',          file:'bb/dodge.html',      emoji:'💨', diff:'insane', desc:'Steer through the meteor storm. How long can you last?' },
 ];
+// localStorage keys + display units for the real best-scores board
+const BEST_META = {
+  snake:{key:'bb_best_snake',unit:'pts'}, breakout:{key:'bb_best_breakout',unit:'pts'},
+  flappy:{key:'bb_best_flappy',unit:'pts'}, memory:{key:'bb_best_memory',unit:'moves'},
+  minesweeper:{key:'bb_best_minesweeper',unit:'s'}, pong:{key:'bb_wins_pong',unit:'wins'},
+  simon:{key:'bb_best_simon',unit:'rounds'}, whack:{key:'bb_best_whack',unit:'pts'},
+  dodge:{key:'bb_best_dodge',unit:'s'},
+};
 
 const diffLabels = { easy:'🟢 Easy', hard:'🟡 Hard', insane:'🔴 Insane' };
 
 function renderGames() {
   document.getElementById('gamesGrid').innerHTML = GAMES.map(g => `
-    <div class="game-card" onclick="openGame('${g.name}','${g.src}')">
+    <div class="game-card" onclick="openGame('${g.id}')">
       <div class="game-thumb">${g.emoji}</div>
       <div class="game-info">
         <div class="game-name">${g.name}</div>
+        <div class="game-desc">${g.desc}</div>
         <span class="difficulty-badge d-${g.diff}">${diffLabels[g.diff]}</span>
       </div>
     </div>`).join('');
 }
 
-function openGame(name, src) {
-  document.getElementById('modalTitle').textContent = name;
-  const frameContainer = document.getElementById('gameFrameArea');
-  
-  // High-performance sandbox flags enabling full game sounds and orientation locks
-  frameContainer.innerHTML = `<iframe id="activeGameFrame" src="${src}" 
-    allow="autoplay; fullscreen; gamepad; microphone; audio" 
-    allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" msallowfullscreen="true"></iframe>`;
-  
+function renderLeaderboard(){
+  const rows = GAMES.map(g=>{
+    const m=BEST_META[g.id];
+    const v=+(localStorage.getItem(m.key)||0);
+    return {name:g.name,emoji:g.emoji,v,unit:m.unit};
+  }).filter(r=>r.v>0).sort((a,b)=>b.v-a.v).slice(0,8);
+  const el=document.getElementById('leaderboard');
+  if(!rows.length){
+    el.innerHTML='<p class="lb-empty">No records yet — play a game and your best score will appear here! 🏅</p>';
+    return;
+  }
+  el.innerHTML=rows.map((r,i)=>
+    `<div class="lb-item"><span><strong>${i+1}.</strong> ${r.emoji} ${r.name}</span><span style="color:var(--accent2)">${r.v} ${r.unit}</span></div>`
+  ).join('');
+}
+
+function openGame(id) {
+  const g=GAMES.find(x=>x.id===id);if(!g)return;
+  document.getElementById('modalTitle').textContent=g.emoji+' '+g.name;
+  document.getElementById('gameFrameArea').innerHTML=
+    `<iframe id="activeGameFrame" src="${g.file}" allow="autoplay; fullscreen; gamepad" allowfullscreen="true"></iframe>`;
   document.getElementById('gameModal').classList.add('open');
+  document.body.style.overflow='hidden';
 }
 
 function closeGame() {
   document.getElementById('gameModal').classList.remove('open');
-  document.getElementById('gameFrameArea').innerHTML = '';
+  document.getElementById('gameFrameArea').innerHTML='';
+  document.body.style.overflow='';
+  renderLeaderboard(); // refresh bests after a session
 }
 
-// IMMERSIVE FULLSCREEN CONSOLE COMMAND
 function forceFullscreen() {
-  const target = document.getElementById('gameFrameArea'); 
-  if (!target) return;
-  
-  if (target.requestFullscreen) { target.requestFullscreen(); }
-  else if (target.webkitRequestFullscreen) { target.webkitRequestFullscreen(); }
-  else if (target.mozRequestFullScreen) { target.mozRequestFullScreen(); }
-  else if (target.msRequestFullscreen) { target.msRequestFullscreen(); }
+  const target=document.getElementById('gameFrameArea');
+  if(!target)return;
+  if(target.requestFullscreen)target.requestFullscreen();
+  else if(target.webkitRequestFullscreen)target.webkitRequestFullscreen();
 }
+
+document.getElementById('gameModal').addEventListener('click',e=>{
+  if(e.target.id==='gameModal')closeGame();
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeGame();});
 
 renderGames();
+renderLeaderboard();
 </script>
 </body>
 </html>

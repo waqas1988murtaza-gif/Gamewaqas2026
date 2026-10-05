@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+<title>💨 Dodge — BrainBlast</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#05070c;color:#e2e8f0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+#top{width:min(94vw,400px);display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.back{color:#63b3ed;text-decoration:none;font-weight:700;font-size:14px}
+#hud{display:flex;gap:8px}
+.pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:6px 12px;border-radius:999px;font-size:14px;font-weight:700}
+canvas{width:min(94vw,400px);height:auto;border-radius:16px;border:2px solid rgba(99,179,237,.25);background:#0a0e1a;touch-action:none;display:block}
+.overlay{position:fixed;inset:0;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;background:rgba(5,7,12,.88);z-index:10;text-align:center;padding:20px}
+.overlay h1{font-size:30px}
+.overlay p{color:#94a3b8;font-size:14px;line-height:1.7;max-width:330px}
+.overlay .sc{font-size:20px;color:#fff;font-weight:800}
+.btn{background:linear-gradient(135deg,#63b3ed,#2563eb);border:none;color:#fff;font-weight:800;font-size:16px;padding:12px 38px;border-radius:999px;cursor:pointer}
+.hidden{display:none!important}
+#hint{color:#5b6b8c;font-size:12px;margin-top:10px}
+</style>
+</head>
+<body>
+<div id="top">
+  <a class="back" href="../brainblast.html">← BrainBlast</a>
+  <div id="hud"><span class="pill">⏱️ <span id="score">0</span></span><span class="pill">🏆 <span id="best">0</span></span></div>
+</div>
+<canvas id="game" width="400" height="560"></canvas>
+<div id="hint">👆 Drag anywhere to move &nbsp;·&nbsp; ⌨️ Arrows / WASD</div>
+
+<div class="overlay" id="startOv">
+  <h1>💨</h1><h1>Dodge</h1>
+  <p>Drag to steer your ship through the meteor storm. Survive as long as you can — it only gets faster!</p>
+  <button class="btn" id="startBtn">▶ Play</button>
+</div>
+<div class="overlay hidden" id="overOv">
+  <h1>💥</h1><h1>Hit!</h1>
+  <p class="sc">Survived: <span id="final">0</span>s</p>
+  <p class="sc" style="font-size:15px;color:#94a3b8">Best: <span id="finalBest">0</span>s <span id="newBest" style="color:#4ade80"></span></p>
+  <button class="btn" id="retryBtn">↻ Play again</button>
+</div>
+
+<script>
+const cv=document.getElementById('game'),ctx=cv.getContext('2d');
+const W=400,H=560,KEY='bb_best_dodge';
+let px,py,blocks,t0,score,best=+localStorage.getItem(KEY)||0,raf=null,running=false,spawnT=0;
+const keys={};
+document.getElementById('best').textContent=best;
+
+function reset(){
+  px=W/2;py=H-90;blocks=[];t0=performance.now();score=0;spawnT=0;
+  document.getElementById('score').textContent='0';
+}
+function loop(now){
+  if(!running)return;
+  const el=(now-t0)/1000;score=el|0;
+  document.getElementById('score').textContent=score;
+  const diff=Math.min(el/30,1); // ramps over 30s
+  // keys
+  const sp=5;
+  if(keys.ArrowLeft||keys.KeyA)px-=sp;if(keys.ArrowRight||keys.KeyD)px+=sp;
+  if(keys.ArrowUp||keys.KeyW)py-=sp;if(keys.ArrowDown||keys.KeyS)py+=sp;
+  px=Math.max(14,Math.min(W-14,px));py=Math.max(14,Math.min(H-14,py));
+  // spawn
+  spawnT--;
+  if(spawnT<=0){
+    const n=1+((el/12)|0);
+    for(let i=0;i<n;i++)blocks.push({x:Math.random()*(W-30),y:-30,s:24+Math.random()*22,v:2.2+diff*4+Math.random()*1.5,rot:Math.random()*6,vr:(Math.random()-.5)*0.1});
+    spawnT=Math.max(14,34-el)|0;
+  }
+  // move + collide
+  for(const b of blocks){
+    b.y+=b.v;b.rot+=b.vr;
+    if(Math.abs(b.x+b.s/2-px)<b.s/2+11&&Math.abs(b.y+b.s/2-py)<b.s/2+11){die();return;}
+  }
+  blocks=blocks.filter(b=>b.y<H+40);
+  draw();raf=requestAnimationFrame(loop);
+}
+function draw(){
+  ctx.fillStyle='#0a0e1a';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='rgba(255,255,255,.2)';
+  for(let i=0;i<24;i++){const sx=(i*137)%W,sy=(i*89)%H;ctx.fillRect(sx,sy,2,2);}
+  for(const b of blocks){
+    ctx.save();ctx.translate(b.x+b.s/2,b.y+b.s/2);ctx.rotate(b.rot);
+    const g=ctx.createLinearGradient(-b.s/2,0,b.s/2,0);
+    g.addColorStop(0,'#7c2d12');g.addColorStop(1,'#f97316');
+    ctx.fillStyle=g;
+    ctx.beginPath();ctx.roundRect(-b.s/2,-b.s/2,b.s,b.s,6);ctx.fill();
+    ctx.restore();
+  }
+  // ship
+  ctx.save();ctx.translate(px,py);
+  const g=ctx.createLinearGradient(0,-14,0,14);
+  g.addColorStop(0,'#22d3ee');g.addColorStop(1,'#0ea5e9');
+  ctx.fillStyle=g;
+  ctx.beginPath();ctx.moveTo(0,-15);ctx.lineTo(11,11);ctx.lineTo(0,5);ctx.lineTo(-11,11);ctx.closePath();ctx.fill();
+  ctx.fillStyle='rgba(34,211,238,.35)';
+  ctx.beginPath();ctx.ellipse(0,16,7,10,0,0,7);ctx.fill();
+  ctx.restore();
+}
+function die(){
+  running=false;cancelAnimationFrame(raf);
+  const s=score;
+  if(s>best){best=s;localStorage.setItem(KEY,best);document.getElementById('newBest').textContent='🎉 NEW!';}
+  else document.getElementById('newBest').textContent='';
+  document.getElementById('final').textContent=s;
+  document.getElementById('finalBest').textContent=best;
+  document.getElementById('best').textContent=best;
+  document.getElementById('overOv').classList.remove('hidden');
+}
+function start(){
+  document.getElementById('startOv').classList.add('hidden');
+  document.getElementById('overOv').classList.add('hidden');
+  reset();running=true;raf=requestAnimationFrame(loop);
+}
+document.getElementById('startBtn').onclick=start;
+document.getElementById('retryBtn').onclick=start;
+document.addEventListener('keydown',e=>{keys[e.code]=true;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();});
+document.addEventListener('keyup',e=>{keys[e.code]=false;});
+function moveTo(e){
+  const r=cv.getBoundingClientRect();
+  const cx=(e.touches?e.touches[0].clientX:e.clientX),cyy=(e.touches?e.touches[0].clientY:e.clientY);
+  px=(cx-r.left)/r.width*W;py=(cyy-r.top)/r.height*H;
+}
+let dragging=false;
+cv.addEventListener('pointerdown',e=>{dragging=true;moveTo(e);});
+window.addEventListener('pointermove',e=>{if(dragging&&running)moveTo(e);});
+window.addEventListener('pointerup',()=>dragging=false);
+cv.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+reset();draw();
+</script>
+</body>
+</html>

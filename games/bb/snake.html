@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+<title>🐍 Snake — BrainBlast</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#05070c;color:#e2e8f0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;user-select:none;-webkit-user-select:none}
+#top{width:min(94vw,420px);display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.back{color:#63b3ed;text-decoration:none;font-weight:700;font-size:14px}
+#hud{display:flex;gap:8px}
+.pill{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:6px 12px;border-radius:999px;font-size:14px;font-weight:700}
+canvas{width:min(94vw,420px);height:auto;border-radius:16px;border:2px solid rgba(99,179,237,.25);background:#0a0e1a;touch-action:none;display:block}
+.overlay{position:fixed;inset:0;display:flex;flex-direction:column;gap:14px;align-items:center;justify-content:center;background:rgba(5,7,12,.88);z-index:10;text-align:center;padding:20px}
+.overlay h1{font-size:30px}
+.overlay p{color:#94a3b8;font-size:14px;line-height:1.7;max-width:330px}
+.overlay .sc{font-size:20px;color:#fff;font-weight:800}
+.btn{background:linear-gradient(135deg,#63b3ed,#2563eb);border:none;color:#fff;font-weight:800;font-size:16px;padding:12px 38px;border-radius:999px;cursor:pointer}
+.hidden{display:none!important}
+#hint{color:#5b6b8c;font-size:12px;margin-top:10px}
+</style>
+</head>
+<body>
+<div id="top">
+  <a class="back" href="../brainblast.html">← BrainBlast</a>
+  <div id="hud"><span class="pill">🍎 <span id="score">0</span></span><span class="pill">🏆 <span id="best">0</span></span></div>
+</div>
+<canvas id="game" width="400" height="400"></canvas>
+<div id="hint">⌨️ Arrows / WASD &nbsp;·&nbsp; 📱 Swipe</div>
+
+<div class="overlay" id="startOv">
+  <h1>🐍</h1><h1>Snake</h1>
+  <p>Eat the apples, grow longer, don't hit the walls or yourself. Speed picks up as you eat!</p>
+  <button class="btn" id="startBtn">▶ Play</button>
+</div>
+<div class="overlay hidden" id="overOv">
+  <h1>💥</h1><h1>Game Over</h1>
+  <p class="sc">Score: <span id="final">0</span></p>
+  <p class="sc" style="font-size:15px;color:#94a3b8">Best: <span id="finalBest">0</span></p>
+  <button class="btn" id="retryBtn">↻ Play again</button>
+</div>
+
+<script>
+const cv=document.getElementById('game'),ctx=cv.getContext('2d');
+const N=20,S=20,KEY='bb_best_snake';
+let snake,dir,ndir,food,score,best=+localStorage.getItem(KEY)||0,timer=null;
+document.getElementById('best').textContent=best;
+
+function reset(){
+  snake=[{x:9,y:10},{x:8,y:10},{x:7,y:10}];
+  dir={x:1,y:0};ndir=dir;score=0;updateHud();placeFood();draw();
+}
+function placeFood(){
+  while(true){
+    const f={x:(Math.random()*N)|0,y:(Math.random()*N)|0};
+    if(!snake.some(s=>s.x===f.x&&s.y===f.y)){food=f;return;}
+  }
+}
+function updateHud(){
+  document.getElementById('score').textContent=score;
+  document.getElementById('best').textContent=best;
+}
+function tick(){
+  dir=ndir;
+  const h={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
+  if(h.x<0||h.y<0||h.x>=N||h.y>=N||snake.some(s=>s.x===h.x&&s.y===h.y)){gameOver();return;}
+  snake.unshift(h);
+  if(h.x===food.x&&h.y===food.y){
+    score+=10;
+    if(score>best){best=score;localStorage.setItem(KEY,best);}
+    placeFood();
+    const speed=Math.max(70,120-(score/10)*2);
+    clearInterval(timer);timer=setInterval(tick,speed);
+  }else snake.pop();
+  draw();updateHud();
+}
+function draw(){
+  ctx.fillStyle='#0a0e1a';ctx.fillRect(0,0,400,400);
+  // food (pulsing apple)
+  const p=1+Math.sin(Date.now()/200)*0.08;
+  ctx.font=`${20*p}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('🍎',food.x*S+S/2,food.y*S+S/2+1);
+  // snake
+  snake.forEach((s,i)=>{
+    const g=ctx.createLinearGradient(s.x*S,s.y*S,s.x*S+S,s.y*S+S);
+    if(i===0){g.addColorStop(0,'#4ade80');g.addColorStop(1,'#16a34a');}
+    else{g.addColorStop(0,'#22c55e');g.addColorStop(1,'#15803d');}
+    ctx.fillStyle=g;
+    const pad=i===0?1:2;
+    roundRect(s.x*S+pad,s.y*S+pad,S-pad*2,S-pad*2,5);ctx.fill();
+    if(i===0){ // eyes
+      ctx.fillStyle='#052e16';
+      const ex=s.x*S+S/2,ey=s.y*S+S/2;
+      const ox=dir.x*4,oy=dir.y*4;
+      ctx.beginPath();ctx.arc(ex-4+ox,ey-3+oy,2.4,0,7);ctx.arc(ex+4+ox,ey-3+oy,2.4,0,7);ctx.fill();
+    }
+  });
+}
+function roundRect(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r);}
+function gameOver(){
+  clearInterval(timer);timer=null;
+  document.getElementById('final').textContent=score;
+  document.getElementById('finalBest').textContent=best;
+  document.getElementById('overOv').classList.remove('hidden');
+}
+function start(){
+  document.getElementById('startOv').classList.add('hidden');
+  document.getElementById('overOv').classList.add('hidden');
+  reset();clearInterval(timer);timer=setInterval(tick,120);
+}
+document.getElementById('startBtn').onclick=start;
+document.getElementById('retryBtn').onclick=start;
+
+const DIRS={ArrowUp:[0,-1],KeyW:[0,-1],ArrowDown:[0,1],KeyS:[0,1],ArrowLeft:[-1,0],KeyA:[-1,0],ArrowRight:[1,0],KeyD:[1,0]};
+document.addEventListener('keydown',e=>{
+  const d=DIRS[e.code];if(!d)return;e.preventDefault();
+  if(d[0]===-dir.x&&d[1]===-dir.y)return;
+  ndir={x:d[0],y:d[1]};
+});
+// swipe
+let tx=0,ty=0;
+cv.addEventListener('touchstart',e=>{const t=e.changedTouches[0];tx=t.clientX;ty=t.clientY;},{passive:true});
+cv.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+cv.addEventListener('touchend',e=>{
+  const t=e.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;
+  if(Math.abs(dx)<20&&Math.abs(dy)<20)return;
+  let d=Math.abs(dx)>Math.abs(dy)?{x:Math.sign(dx),y:0}:{x:0,y:Math.sign(dy)};
+  if(!(d.x===-dir.x&&d.y===-dir.y))ndir=d;
+},{passive:true});
+reset();
+</script>
+</body>
+</html>
