@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>⭐ Star Collector 3D — Waqas Game Hub</title>
+<script src="../three.min.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { width:100%; height:100%; overflow:hidden; touch-action:none; overscroll-behavior:none;
+    font-family:'Segoe UI', system-ui, sans-serif; background:#87ceeb; user-select:none; -webkit-user-select:none; }
+  #game-container { position:fixed; inset:0; }
+  #game-container canvas { display:block; }
+
+  /* ---------- HUD ---------- */
+  #hud { position:fixed; top:0; left:0; right:0; display:flex; justify-content:space-between; align-items:center;
+    padding:10px 14px; z-index:20; pointer-events:none; gap:8px; }
+  .hud-box { background:rgba(10,20,40,.62); color:#fff; border-radius:14px; padding:8px 14px;
+    font-size:17px; font-weight:700; backdrop-filter:blur(4px); white-space:nowrap;
+    box-shadow:0 2px 10px rgba(0,0,0,.25); }
+  #hud-score { color:#ffd93b; }
+
+  /* ---------- Joystick ---------- */
+  #joy-base { position:fixed; width:120px; height:120px; border-radius:50%; z-index:30; display:none;
+    background:rgba(255,255,255,.14); border:2px solid rgba(255,255,255,.45); pointer-events:none; }
+  #joy-knob { position:absolute; left:50%; top:50%; width:54px; height:54px; border-radius:50%;
+    background:rgba(255,255,255,.75); box-shadow:0 2px 8px rgba(0,0,0,.3);
+    transform:translate(-50%,-50%); }
+
+  /* ---------- Overlays ---------- */
+  .overlay { position:fixed; inset:0; z-index:50; display:flex; align-items:center; justify-content:center;
+    background:rgba(5,12,28,.72); backdrop-filter:blur(6px); padding:20px; }
+  .overlay.hidden { display:none; }
+  .panel { background:linear-gradient(160deg,#16213e,#0b1020); border:2px solid #22d3ee55; border-radius:24px;
+    padding:34px 30px; max-width:420px; width:100%; text-align:center; color:#eef2ff;
+    box-shadow:0 20px 60px rgba(0,0,0,.5); }
+  .panel h1 { font-size:30px; margin-bottom:8px; }
+  .panel p { color:#9aa7c7; font-size:15px; line-height:1.7; margin-bottom:14px; }
+  .panel .rules { text-align:left; background:rgba(255,255,255,.05); border-radius:14px;
+    padding:14px 16px; margin-bottom:20px; font-size:14.5px; line-height:2; }
+  .big-btn { display:inline-block; border:none; cursor:pointer; font-size:20px; font-weight:800;
+    color:#0b1020; background:linear-gradient(90deg,#22d3ee,#a78bfa); padding:15px 46px; border-radius:999px;
+    box-shadow:0 8px 24px #22d3ee55; transition:transform .15s; font-family:inherit; }
+  .big-btn:active { transform:scale(.95); }
+  #end-emoji { font-size:64px; margin-bottom:6px; }
+  #end-score-line { font-size:19px; font-weight:800; color:#ffd93b; margin:8px 0 2px; }
+  #end-best-line { font-size:14px; color:#9aa7c7; margin-bottom:20px; }
+  #newbest { display:none; color:#4ade80; font-weight:800; font-size:15px; margin-bottom:4px; }
+
+  #test-status { position:fixed; bottom:6px; left:8px; z-index:99; color:#fff; font-size:12px;
+    background:rgba(0,0,0,.55); padding:4px 10px; border-radius:8px; display:none; font-family:monospace; }
+  #nogl { position:fixed; inset:0; z-index:99; display:none; align-items:center; justify-content:center;
+    background:#0b1020; color:#fff; font-size:17px; padding:30px; text-align:center; }
+</style>
+</head>
+<body>
+<div id="game-container"></div>
+
+<div id="hud">
+  <div class="hud-box" id="hud-stars">⭐ 0/12</div>
+  <div class="hud-box" id="hud-time">⏱ 1:30</div>
+  <div class="hud-box" id="hud-hearts">❤️❤️❤️</div>
+  <div class="hud-box" id="hud-score">0</div>
+</div>
+
+<div id="joy-base"><div id="joy-knob"></div></div>
+
+<div class="overlay" id="start-screen">
+  <div class="panel">
+    <h1>⭐ Star Collector 3D</h1>
+    <p>Help Robo collect all the shiny stars!</p>
+    <div class="rules">
+      🎯 Collect all <b>12 stars</b> to win<br>
+      😡 Don't touch the <b>red grumpy bots</b><br>
+      ❤️ You have <b>3 hearts</b> &nbsp;•&nbsp; ⏱ <b>90 seconds</b><br>
+      🕹️ <b>Drag</b> anywhere to move &nbsp;•&nbsp; ⌨️ <b>WASD / arrows</b> on PC
+    </div>
+    <button class="big-btn" id="btn-play">▶ PLAY</button>
+  </div>
+</div>
+
+<div class="overlay hidden" id="end-screen">
+  <div class="panel">
+    <div id="end-emoji">🏆</div>
+    <h1 id="end-title">You Win!</h1>
+    <p id="end-sub">Amazing star collecting!</p>
+    <div id="end-score-line">Score: 0</div>
+    <div id="newbest">🎉 NEW BEST SCORE! 🎉</div>
+    <div id="end-best-line">Best: 0</div>
+    <button class="big-btn" id="btn-again">🔄 PLAY AGAIN</button>
+  </div>
+</div>
+
+<div id="test-status"></div>
+<div id="nogl"><div>😢 Sorry, this game needs WebGL.<br>Please try Chrome or Safari on your phone.</div></div>
+
+<script>
+(function(){
+"use strict";
+var AUTOTEST = (new URLSearchParams(location.search)).has('autotest');
+var SELFTEST = (new URLSearchParams(location.search)).has('selftest');
+
+/* ================= AUDIO ================= */
+var actx = null;
+function audio(){ if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } return actx; }
+function tone(freq, dur, type, vol, delay){
+  var c = audio(); if(!c) return;
+  type = type||'sine'; vol = vol||0.22; delay = delay||0;
+  var o = c.createOscillator(), g = c.createGain();
+  o.type = type; o.frequency.value = freq;
+  var t = c.currentTime + delay;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t+0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t); o.stop(t+dur+0.05);
+}
+var sfx = {
+  click:   function(){ tone(620,0.08,'square',0.12); },
+  collect: function(){ tone(660,0.12,'sine',0.25); tone(990,0.16,'sine',0.25,0.09); },
+  hit:     function(){ tone(170,0.28,'sawtooth',0.28); tone(120,0.3,'sawtooth',0.22,0.05); },
+  win:     function(){ var n=[523,659,784,1046,1318]; for(var i=0;i<n.length;i++) tone(n[i],0.22,'triangle',0.25,i*0.13); },
+  lose:    function(){ var n=[400,340,280,190]; for(var i=0;i<n.length;i++) tone(n[i],0.25,'sawtooth',0.2,i*0.16); }
+};
+
+/* ================= STATE ================= */
+var TOTAL_STARS = 12, TIME_LIMIT = 90, MAX_HEARTS = 3, ARENA = 20.5;
+var state = 'menu';           // menu | playing | won | lost
+var starsCollected = 0, hearts = MAX_HEARTS, timeLeft = TIME_LIMIT, score = 0;
+var invincibleT = 0, elapsed = 0, autoAngle = 0;
+var best = 0;
+try{ best = parseInt(localStorage.getItem('starCollector3D_best')||'0',10)||0; }catch(e){}
+
+/* ================= THREE SETUP ================= */
+var container = document.getElementById('game-container');
+var renderer;
+try{
+  renderer = new THREE.WebGLRenderer({antialias:true});
+}catch(e){
+  document.getElementById('nogl').style.display = 'flex';
+  return;
+}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+if (THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
+container.appendChild(renderer.domElement);
+
+var scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87ceeb);
+scene.fog = new THREE.Fog(0x87ceeb, 45, 110);
+
+var camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 250);
+
+scene.add(new THREE.HemisphereLight(0xcfe8ff, 0x3f7a3f, 0.7));
+var sun = new THREE.DirectionalLight(0xffffff, 0.75);
+sun.position.set(24, 34, 14);
+sun.castShadow = true;
+sun.shadow.mapSize.set(1024,1024);
+sun.shadow.camera.left=-34; sun.shadow.camera.right=34;
+sun.shadow.camera.top=34; sun.shadow.camera.bottom=-34;
+sun.shadow.camera.far=100;
+scene.add(sun);
+
+function mat(color, emissive, ei){
+  var m = new THREE.MeshStandardMaterial({color:color, roughness:0.75, metalness:0.05});
+  if(emissive!==undefined){ m.emissive = new THREE.Color(emissive); m.emissiveIntensity = ei||0.6; }
+  return m;
+}
+
+/* ================= WORLD ================= */
+var ground = new THREE.Mesh(new THREE.PlaneGeometry(160,160), mat(0x4c9a44));
+ground.rotation.x = -Math.PI/2; ground.receiveShadow = true; scene.add(ground);
+
+var arenaFloor = new THREE.Mesh(new THREE.PlaneGeometry(ARENA*2+3, ARENA*2+3), mat(0x5cab50));
+arenaFloor.rotation.x = -Math.PI/2; arenaFloor.position.y = 0.02; arenaFloor.receiveShadow = true; scene.add(arenaFloor);
+
+// decorative darker grass patches
+for(var pi=0; pi<10; pi++){
+  var patch = new THREE.Mesh(new THREE.CircleGeometry(1+Math.random()*2.2, 20), mat(0x478f3e));
+  patch.rotation.x = -Math.PI/2;
+  patch.position.set((Math.random()*2-1)*34, 0.03, (Math.random()*2-1)*34);
+  patch.receiveShadow = true; scene.add(patch);
+}
+
+// fence around arena
+var fenceMat = mat(0x8b5a2b), F = ARENA+1.5;
+for(var fi=-F; fi<=F; fi+=4){
+  [[fi,-F],[fi,F],[-F,fi],[F,fi]].forEach(function(p){
+    var post = new THREE.Mesh(new THREE.BoxGeometry(0.45,1.7,0.45), fenceMat);
+    post.position.set(p[0],0.85,p[1]); post.castShadow = true; scene.add(post);
+  });
+}
+[[0,-F,2*F+0.5,0.18],[0,F,2*F+0.5,0.18]].forEach(function(r){
+  [0.65,1.25].forEach(function(h){
+    var rail = new THREE.Mesh(new THREE.BoxGeometry(r[2],r[3],0.18), fenceMat);
+    rail.position.set(r[0],h,r[1]); scene.add(rail);
+  });
+});
+[[-F,0],[F,0]].forEach(function(p){
+  [0.65,1.25].forEach(function(h){
+    var rail = new THREE.Mesh(new THREE.BoxGeometry(0.18,0.18,2*F+0.5), fenceMat);
+    rail.position.set(p[0],h,p[1]); scene.add(rail);
+  });
+});
+
+// trees outside the fence
+function tree(x,z,s){
+  var g = new THREE.Group();
+  var trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.28*s,0.38*s,1.6*s,8), mat(0x7a4a21));
+  trunk.position.y = 0.8*s; trunk.castShadow = true; g.add(trunk);
+  var c1 = new THREE.Mesh(new THREE.ConeGeometry(1.7*s,2.6*s,9), mat(0x2f7d32));
+  c1.position.y = 2.6*s; c1.castShadow = true; g.add(c1);
+  var c2 = new THREE.Mesh(new THREE.ConeGeometry(1.2*s,1.9*s,9), mat(0x3a9140));
+  c2.position.y = 3.8*s; c2.castShadow = true; g.add(c2);
+  g.position.set(x,0,z); scene.add(g);
+}
+for(var ti=0; ti<14; ti++){
+  var a = Math.random()*Math.PI*2, r = 28+Math.random()*26;
+  tree(Math.cos(a)*r, Math.sin(a)*r, 0.8+Math.random()*0.9);
+}
+
+// clouds
+var clouds = [];
+function cloud(x,y,z,s){
+  var g = new THREE.Group(), cm = mat(0xffffff);
+  cm.roughness = 1;
+  for(var i=0;i<3;i++){
+    var b = new THREE.Mesh(new THREE.SphereGeometry((1.4-i*0.25)*s,12,10), cm);
+    b.position.set(i*1.6*s - 1.6*s, (i%2)*0.5*s, 0); g.add(b);
+  }
+  g.position.set(x,y,z); scene.add(g); clouds.push(g);
+}
+for(var ci=0; ci<6; ci++) cloud((Math.random()*2-1)*60, 17+Math.random()*7, (Math.random()*2-1)*60, 1+Math.random());
+
+/* ================= PLAYER (cute robot) ================= */
+var player = new THREE.Group();
+var pBody = new THREE.Mesh(new THREE.BoxGeometry(1,1.15,0.75), mat(0x3b82f6));
+pBody.position.y = 0.95; pBody.castShadow = true; player.add(pBody);
+var pHead = new THREE.Mesh(new THREE.SphereGeometry(0.46,18,14), mat(0x93c5fd));
+pHead.position.y = 1.95; pHead.castShadow = true; player.add(pHead);
+var eyeMat = mat(0x101828);
+[-0.17,0.17].forEach(function(x){
+  var eye = new THREE.Mesh(new THREE.SphereGeometry(0.09,10,8), eyeMat);
+  eye.position.set(x,2.0,0.4); player.add(eye);
+});
+var smile = new THREE.Mesh(new THREE.TorusGeometry(0.13,0.035,8,14,Math.PI), mat(0x101828));
+smile.position.set(0,1.86,0.42); smile.rotation.x = Math.PI; player.add(smile);
+var ant = new THREE.Mesh(new THREE.CylinderGeometry(0.04,0.04,0.4,8), mat(0x9aa7c7));
+ant.position.y = 2.55; player.add(ant);
+var antBall = new THREE.Mesh(new THREE.SphereGeometry(0.1,10,8), mat(0xef4444,0xef4444,0.8));
+antBall.position.y = 2.78; player.add(antBall);
+var armL = new THREE.Mesh(new THREE.BoxGeometry(0.28,0.8,0.28), mat(0x2563eb));
+armL.position.set(-0.68,1.0,0); armL.castShadow = true; player.add(armL);
+var armR = armL.clone(); armR.position.x = 0.68; player.add(armR);
+var legL = new THREE.Mesh(new THREE.BoxGeometry(0.32,0.55,0.32), mat(0x1d4ed8));
+legL.position.set(-0.24,0.32,0); legL.castShadow = true; player.add(legL);
+var legR = legL.clone(); legR.position.x = 0.24; player.add(legR);
+player.position.set(0,0,14);
+scene.add(player);
+var playerVel = new THREE.Vector3();
+
+/* ================= STARS ================= */
+var starGeo = new THREE.OctahedronGeometry(0.62);
+var starMat = new THREE.MeshStandardMaterial({color:0xffd93b, emissive:0xffb800, emissiveIntensity:0.75,
+  metalness:0.35, roughness:0.25});
+var stars = [];
+function freeSpot(minPlayerDist){
+  for(var t=0;t<60;t++){
+    var x=(Math.random()*2-1)*(ARENA-1.5), z=(Math.random()*2-1)*(ARENA-1.5);
+    var dx=x-player.position.x, dz=z-player.position.z;
+    if(Math.sqrt(dx*dx+dz*dz) < (minPlayerDist||4)) continue;
+    var ok=true;
+    for(var i=0;i<stars.length;i++){
+      var s=stars[i], ddx=x-s.mesh.position.x, ddz=z-s.mesh.position.z;
+      if(Math.sqrt(ddx*ddx+ddz*ddz)<3){ ok=false; break; }
+    }
+    if(ok) return {x:x,z:z};
+  }
+  return {x:(Math.random()*2-1)*(ARENA-2), z:(Math.random()*2-1)*(ARENA-2)};
+}
+function spawnStar(){
+  var p = freeSpot(4);
+  var m = new THREE.Mesh(starGeo, starMat);
+  m.position.set(p.x, 1.25, p.z); m.castShadow = true;
+  scene.add(m);
+  stars.push({mesh:m, phase:Math.random()*Math.PI*2});
+}
+for(var si=0; si<TOTAL_STARS; si++) spawnStar();
+
+/* ================= ENEMIES (grumpy bots) ================= */
+var enemies = [];
+function grumpyBot(x1,z1,x2,z2,speed,phase){
+  var g = new THREE.Group();
+  var body = new THREE.Mesh(new THREE.BoxGeometry(1.25,1.0,1.0), mat(0xef4444));
+  body.position.y = 0.85; body.castShadow = true; g.add(body);
+  for(var s=-1;s<=1;s++){
+    var spike = new THREE.Mesh(new THREE.ConeGeometry(0.16,0.5,6), mat(0x991b1b));
+    spike.position.set(s*0.4,1.6,0); g.add(spike);
+  }
+  var wEye = mat(0xffffff);
+  [-0.28,0.28].forEach(function(x){
+    var e = new THREE.Mesh(new THREE.SphereGeometry(0.16,10,8), wEye);
+    e.position.set(x,1.05,0.51); g.add(e);
+    var pup = new THREE.Mesh(new THREE.SphereGeometry(0.07,8,6), eyeMat);
+    pup.position.set(x,1.02,0.65); g.add(pup);
+  });
+  // angry brows
+  [-0.28,0.28].forEach(function(x,i){
+    var b = new THREE.Mesh(new THREE.BoxGeometry(0.34,0.08,0.08), mat(0x101828));
+    b.position.set(x,1.28,0.55); b.rotation.z = i===0? 0.5 : -0.5; g.add(b);
+  });
+  g.position.set(x1,0,z1); scene.add(g);
+  enemies.push({g:g, ax:x1, az:z1, bx:x2, bz:z2, speed:speed, t:phase||0, dir:1});
+}
+grumpyBot(-14,-8, 14,-8, 2.8, 0);
+grumpyBot( 14, 8,-14, 8, 3.3, 0.5);
+grumpyBot(-11,-14,-11,14, 3.8, 0.25);
+
+/* ================= INPUT ================= */
+var keys = {};
+window.addEventListener('keydown', function(e){
+  keys[e.key.toLowerCase()] = true;
+  if(['arrowup','arrowdown','arrowleft','arrowright',' '].indexOf(e.key.toLowerCase())>=0) e.preventDefault();
+});
+window.addEventListener('keyup', function(e){ keys[e.key.toLowerCase()] = false; });
+
+var joy = {active:false, id:null, ox:0, oy:0, x:0, y:0};
+var joyBase = document.getElementById('joy-base'), joyKnob = document.getElementById('joy-knob');
+function tPos(t){ return {x:t.clientX, y:t.clientY}; }
+document.addEventListener('touchstart', function(e){
+  if(state!=='playing') return;
+  for(var i=0;i<e.changedTouches.length;i++){
+    var t = e.changedTouches[i];
+    if(t.target.closest && t.target.closest('.overlay, .big-btn')) continue;
+    if(!joy.active){
+      var p = tPos(t);
+      joy.active=true; joy.id=t.identifier; joy.ox=p.x; joy.oy=p.y; joy.x=0; joy.y=0;
+      joyBase.style.display='block';
+      joyBase.style.left=(p.x-60)+'px'; joyBase.style.top=(p.y-60)+'px';
+      joyKnob.style.transform='translate(-50%,-50%)';
+      e.preventDefault();
+    }
+  }
+},{passive:false});
+document.addEventListener('touchmove', function(e){
+  if(!joy.active) return;
+  for(var i=0;i<e.changedTouches.length;i++){
+    var t=e.changedTouches[i];
+    if(t.identifier===joy.id){
+      var p=tPos(t), dx=p.x-joy.ox, dy=p.y-joy.oy;
+      var len=Math.sqrt(dx*dx+dy*dy), max=48;
+      if(len>max){ dx=dx/len*max; dy=dy/len*max; }
+      joy.x=dx/max; joy.y=dy/max;
+      joyKnob.style.transform='translate(calc(-50% + '+dx+'px), calc(-50% + '+dy+'px))';
+      e.preventDefault();
+    }
+  }
+},{passive:false});
+function joyEnd(e){
+  for(var i=0;i<e.changedTouches.length;i++){
+    if(e.changedTouches[i].identifier===joy.id){
+      joy.active=false; joy.id=null; joy.x=0; joy.y=0;
+      joyBase.style.display='none';
+    }
+  }
+}
+document.addEventListener('touchend', joyEnd);
+document.addEventListener('touchcancel', joyEnd);
+
+function seekInput(){
+  // self-test AI: steer toward the nearest star
+  var bx=player.position.x, bz=player.position.z, bd=1e18, tx=bx, tz=bz;
+  for(var i=0;i<stars.length;i++){
+    var p=stars[i].mesh.position, dx=p.x-bx, dz=p.z-bz, d=dx*dx+dz*dz;
+    if(d<bd){ bd=d; tx=p.x; tz=p.z; }
+  }
+  var vx=tx-bx, vz=tz-bz, l=Math.sqrt(vx*vx+vz*vz)||1;
+  return {x:vx/l, z:vz/l};
+}
+function readInput(){
+  if(SELFTEST && state==='playing') return seekInput();
+  var x=0, z=0;
+  if(keys['a']||keys['arrowleft']) x-=1;
+  if(keys['d']||keys['arrowright']) x+=1;
+  if(keys['w']||keys['arrowup']) z-=1;
+  if(keys['s']||keys['arrowdown']) z+=1;
+  if(joy.active){ x+=joy.x; z+=joy.y; }
+  if(AUTOTEST && state==='playing'){ x=Math.cos(autoAngle); z=Math.sin(autoAngle); }
+  var l=Math.sqrt(x*x+z*z);
+  if(l>1){ x/=l; z/=l; }
+  return {x:x, z:z};
+}
+
+/* ================= HUD ================= */
+var hudStars=document.getElementById('hud-stars'), hudTime=document.getElementById('hud-time'),
+    hudHearts=document.getElementById('hud-hearts'), hudScore=document.getElementById('hud-score');
+function fmtTime(s){ s=Math.max(0,Math.ceil(s)); return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2); }
+function updateHUD(){
+  hudStars.textContent = '⭐ '+starsCollected+'/'+TOTAL_STARS;
+  hudTime.textContent = '⏱ '+fmtTime(timeLeft);
+  hudHearts.textContent = '❤️'.repeat(hearts)+'🖤'.repeat(MAX_HEARTS-hearts);
+  hudScore.textContent = score;
+}
+
+/* ================= GAME FLOW ================= */
+var startScreen=document.getElementById('start-screen'), endScreen=document.getElementById('end-screen');
+function startGame(){
+  audio(); sfx.click();
+  // reset world
+  starsCollected=0; hearts=MAX_HEARTS; timeLeft=TIME_LIMIT; score=0; invincibleT=0; elapsed=0;
+  player.position.set(0,0,14); playerVel.set(0,0,0); player.visible=true;
+  stars.forEach(function(s){ scene.remove(s.mesh); }); stars.length=0;
+  for(var i=0;i<TOTAL_STARS;i++) spawnStar();
+  enemies[0].t=0; enemies[1].t=0.5; enemies[2].t=0.25;
+  state='playing';
+  startScreen.classList.add('hidden'); endScreen.classList.add('hidden');
+  updateHUD();
+}
+function endGame(won){
+  state = won?'won':'lost';
+  if(won){ score += hearts*100 + Math.ceil(timeLeft)*10; sfx.win(); }
+  else sfx.lose();
+  var isBest = false;
+  if(score>best){ best=score; isBest=true; try{ localStorage.setItem('starCollector3D_best',String(best)); }catch(e){} }
+  document.getElementById('end-emoji').textContent = won?'🏆':'😢';
+  document.getElementById('end-title').textContent = won?'You Win!':'Game Over';
+  document.getElementById('end-sub').textContent = won?'Amazing! You collected all the stars!':'The grumpy bots got you. Try again!';
+  document.getElementById('end-score-line').textContent = 'Score: '+score;
+  document.getElementById('newbest').style.display = isBest?'block':'none';
+  document.getElementById('end-best-line').textContent = 'Best: '+best;
+  updateHUD();
+  setTimeout(function(){ endScreen.classList.remove('hidden'); }, 600);
+}
+document.getElementById('btn-play').addEventListener('click', startGame);
+document.getElementById('btn-again').addEventListener('click', startGame);
+
+/* ================= MAIN LOOP ================= */
+var clock = new THREE.Clock();
+var camTarget = new THREE.Vector3();
+function dist2(ax,az,bx,bz){ var dx=ax-bx,dz=az-bz; return Math.sqrt(dx*dx+dz*dz); }
+
+/* ================= GAME STEP (logic only — also used by self-test) ================= */
+function stepGame(dt){
+  elapsed += dt;
+  if(AUTOTEST) autoAngle += dt*0.85;
+
+  // clouds always drift
+  for(var ci=0; ci<clouds.length; ci++){
+    clouds[ci].position.x += dt*0.7;
+    if(clouds[ci].position.x > 70) clouds[ci].position.x = -70;
+  }
+
+  if(state!=='playing') return;
+    timeLeft -= dt;
+    if(timeLeft<=0){ timeLeft=0; endGame(false); }
+
+    // --- player movement ---
+    var inp = readInput();
+    var SPEED = 9;
+    playerVel.x = inp.x*SPEED; playerVel.z = inp.z*SPEED;
+    player.position.x += playerVel.x*dt;
+    player.position.z += playerVel.z*dt;
+    player.position.x = Math.max(-ARENA, Math.min(ARENA, player.position.x));
+    player.position.z = Math.max(-ARENA, Math.min(ARENA, player.position.z));
+    var moving = Math.sqrt(inp.x*inp.x+inp.z*inp.z) > 0.1;
+    if(moving){
+      var targetA = Math.atan2(inp.x, inp.z);
+      var cur = player.rotation.y, diff = targetA-cur;
+      while(diff>Math.PI) diff-=Math.PI*2;
+      while(diff<-Math.PI) diff+=Math.PI*2;
+      player.rotation.y = cur + diff*Math.min(1, dt*12);
+      player.position.y = Math.abs(Math.sin(elapsed*11))*0.09;
+      armL.rotation.x = Math.sin(elapsed*11)*0.7;
+      armR.rotation.x = -Math.sin(elapsed*11)*0.7;
+      legL.rotation.x = -Math.sin(elapsed*11)*0.7;
+      legR.rotation.x = Math.sin(elapsed*11)*0.7;
+    } else {
+      player.position.y *= 0.9;
+      armL.rotation.x *= 0.9; armR.rotation.x *= 0.9;
+      legL.rotation.x *= 0.9; legR.rotation.x *= 0.9;
+    }
+    antBall.position.y = 2.78 + Math.sin(elapsed*5)*0.05;
+
+    // --- invincibility blink ---
+    if(invincibleT>0){
+      invincibleT -= dt;
+      player.visible = Math.floor(elapsed*8)%2===0;
+      if(invincibleT<=0) player.visible = true;
+    }
+
+    // --- stars ---
+    for(var i=stars.length-1;i>=0;i--){
+      var s = stars[i];
+      s.mesh.rotation.y += dt*2.2;
+      s.mesh.position.y = 1.25 + Math.sin(elapsed*3+s.phase)*0.28;
+      if(dist2(player.position.x,player.position.z,s.mesh.position.x,s.mesh.position.z) < 1.55){
+        scene.remove(s.mesh); stars.splice(i,1);
+        starsCollected++; score += 100;
+        sfx.collect(); updateHUD();
+        if(starsCollected>=TOTAL_STARS){ endGame(true); break; }
+      }
+    }
+
+    // --- enemies patrol + collision ---
+    for(var e=0;e<enemies.length;e++){
+      var en=enemies[e];
+      en.t += dt*en.speed*en.dir;
+      var segLen = dist2(en.ax,en.az,en.bx,en.bz);
+      var prog = en.t/segLen;
+      if(prog>=1){ prog=1; en.dir=-1; } else if(prog<=0){ prog=0; en.dir=1; }
+      en.g.position.x = en.ax + (en.bx-en.ax)*prog;
+      en.g.position.z = en.az + (en.bz-en.az)*prog;
+      en.g.rotation.y = Math.atan2((en.bx-en.ax)*en.dir, (en.bz-en.az)*en.dir);
+      en.g.position.y = Math.abs(Math.sin(elapsed*6+e*2))*0.08;
+      if(invincibleT<=0 && dist2(player.position.x,player.position.z,en.g.position.x,en.g.position.z) < 1.5){
+        hearts--; invincibleT=2.0; sfx.hit(); updateHUD();
+        // knockback away from enemy
+        var kx=player.position.x-en.g.position.x, kz=player.position.z-en.g.position.z;
+        var kl=Math.sqrt(kx*kx+kz*kz)||1;
+        player.position.x = Math.max(-ARENA,Math.min(ARENA, player.position.x + kx/kl*3));
+        player.position.z = Math.max(-ARENA,Math.min(ARENA, player.position.z + kz/kl*3));
+        if(hearts<=0){ endGame(false); break; }
+      }
+    }
+    updateHUD();
+}
+
+/* ================= RENDER LOOP ================= */
+function animate(){
+  requestAnimationFrame(animate);
+  var dt = Math.min(clock.getDelta(), 0.05);
+  stepGame(dt);
+
+  // --- camera follow ---
+  camTarget.set(player.position.x, 0, player.position.z);
+  var desired = new THREE.Vector3(camTarget.x, 10.5, camTarget.z+12.5);
+  camera.position.lerp(desired, 1-Math.exp(-4.5*dt));
+  camera.lookAt(camTarget.x, 1.6, camTarget.z);
+
+  // autotest status
+  if(AUTOTEST){
+    autoTick++;
+    if(autoTick%30===0){
+      var msg = 'stars='+starsCollected+' hearts='+hearts+' t='+Math.ceil(timeLeft)+' score='+score+' state='+state;
+      document.title = 'SC3D '+msg;
+      var ts = document.getElementById('test-status');
+      ts.style.display='block'; ts.textContent = msg;
+    }
+  }
+
+  renderer.render(scene, camera);
+}
+var autoTick = 0;
+
+window.addEventListener('resize', function(){
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+document.addEventListener('gesturestart', function(e){ e.preventDefault(); });
+
+camera.position.set(0,10.5,26.5);
+updateHUD();
+if(SELFTEST){
+  // headless logic test: play a full game with a seek-the-nearest-star AI
+  startScreen.classList.add('hidden'); startGame();
+  var steps = 0;
+  while(state==='playing' && steps < 60*120){ stepGame(1/60); steps++; }
+  var smsg = 'SELFTEST steps='+steps+' stars='+starsCollected+' hearts='+hearts+
+             ' t='+Math.ceil(timeLeft)+' score='+score+' state='+state+' best='+best;
+  document.title = smsg;
+  var sts = document.getElementById('test-status');
+  sts.style.display='block'; sts.textContent = smsg;
+  renderer.render(scene, camera);
+}
+animate();
+if(AUTOTEST){ startScreen.classList.add('hidden'); startGame(); }
+})();
+</script>
+</body>
+</html>
